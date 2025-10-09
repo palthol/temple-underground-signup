@@ -1,0 +1,13 @@
+{
+  "app.title": "Temple Underground Waiver",
+  "lang.en": "English",
+  "lang.es": "Español",
+  "form.full_name": "Full Name",
+  "form.dob": "Date of Birth",
+  "form.email": "Email",
+  "form.signature": "Signature",
+  "form.clear_signature": "Clear",
+  "form.submit": "Submit",
+  "validation.required": "This field is required",
+  "validation.email": "Enter a valid email address"
+}

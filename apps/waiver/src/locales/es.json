@@ -1,0 +1,13 @@
+{
+  "app.title": "Exención de Responsabilidad de Temple Underground",
+  "lang.en": "English",
+  "lang.es": "Español",
+  "form.full_name": "Nombre completo",
+  "form.dob": "Fecha de nacimiento",
+  "form.email": "Correo electrónico",
+  "form.signature": "Firma",
+  "form.clear_signature": "Limpiar",
+  "form.submit": "Enviar",
+  "validation.required": "Este campo es obligatorio",
+  "validation.email": "Introduce un correo electrónico válido"
+}
