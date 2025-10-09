@@ -14,7 +14,7 @@ Implementation
 
 - Export `theme.ts` with palette, typography, components overrides.
 - Provide high-contrast mode variant.
- - Integrate MUI locale packs (e.g., `esES`) and date localization provider.
+- Integrate MUI locale packs (e.g., `esES`) and date localization provider.
 
 Component Rules
 
@@ -24,4 +24,4 @@ Component Rules
 Multi-Tenant
 
 - Resolve theme by tenant; allow runtime theme switching.
- - Allow per-tenant default locale with user override.
+- Allow per-tenant default locale with user override.

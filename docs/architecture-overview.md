@@ -10,7 +10,7 @@ High-Level Components
 - External Controller: GUI to edit text content keyed by IDs; live previews; multi-locale authoring (EN/ES).
 - API Service: Submit, PDF generation, audit, and admin search/detail.
 - Supabase: Postgres tables, private Storage buckets, optional Auth for admin.
- - i18n: Locale provider, content catalogs per locale, MUI `esES` and date locale integration.
+- i18n: Locale provider, content catalogs per locale, MUI `esES` and date locale integration.
 
 Data Flow
 

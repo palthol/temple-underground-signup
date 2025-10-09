@@ -12,13 +12,13 @@ Packages
 - `@tu/components-base`: base MUI set
 - `@tu/components-proprietary`: closed-source packs
 - `@tu/controller`: external GUI
- - `@tu/i18n` (optional): shared i18n utilities and locale catalogs
+- `@tu/i18n` (optional): shared i18n utilities and locale catalogs
 
 Process
 
 - PRs require changelog updates per package.
 - Tag releases; generate release notes; publish to registry (private if needed).
- - Version content sets per locale; include `content_version` in audit for reproducibility.
+- Version content sets per locale; include `content_version` in audit for reproducibility.
 
 Deprecation
 

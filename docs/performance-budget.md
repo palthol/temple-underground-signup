@@ -12,7 +12,7 @@ Strategies
 - Memoize fields; avoid re-renders; RHF Controller where needed.
 - Debounced autosave; idle-time work; requestIdleCallback for non-critical.
 - Cache schema/content; ETag and immutable assets.
- - Lazy-load locale data and component packs; avoid bundling unused locales.
+- Lazy-load locale data and component packs; avoid bundling unused locales.
 
 Diagnostics
 

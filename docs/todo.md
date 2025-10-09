@@ -36,6 +36,8 @@ External Controller
 - [ ] GUI for editing content keys with preview
 - [ ] Live sync channel (shared store or postMessage)
 - [ ] Versioning and publish/draft workflow
+- [ ] Locale-aware authoring: EN/ES tabs, side-by-side view, missing-key highlighting
+- [ ] Preview sync supports `locale:select` messages
 
 API & Persistence
 
@@ -43,6 +45,7 @@ API & Persistence
 - [ ] `POST /api/waivers/submit` implementation
 - [ ] PDF generation (pdf-lib), SHA‑256, upload, audit write
 - [ ] Admin endpoints and auth guard
+ - [ ] Embed PDF fonts with full Latin support for Spanish diacritics
 
 Admin App
 

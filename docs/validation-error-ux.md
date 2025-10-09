@@ -9,13 +9,13 @@ Client Validation
 
 - React Hook Form + Yup: required fields, formats, conditional rules.
 - Debounced validation on blur/change; validate on step next.
- - Localize messages via content keys; Spanish catalogs for error text.
+- Localize messages via content keys; Spanish catalogs for error text.
 
 Server Validation
 
 - Mirror rules; enforce invariants and data types.
 - Return structured errors `{ field, messageKey }` for mapping.
- - Accept `locale` and return localized message keys where admin UI displays them.
+- Accept `locale` and return localized message keys where admin UI displays them.
 
 Error Presentation
 

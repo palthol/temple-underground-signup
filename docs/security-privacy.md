@@ -14,7 +14,7 @@ Audit Invariants
 
 - Persist signature vector JSON and final PDF SHA-256.
 - Immutable audit rows; append-only.
- - Capture `locale` and `content_version` for defensibility and exact re-rendering.
+- Capture `locale` and `content_version` for defensibility and exact re-rendering.
 
 Transport & Auth
 

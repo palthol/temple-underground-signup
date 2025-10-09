@@ -16,7 +16,7 @@ Migrations
 
 - Store SQL in `supabase/migrations/*.sql` with id-timestamp filenames.
 - Use foreign keys with ON DELETE CASCADE for participant aggregates.
- - Optionally enable `unaccent` extension for accent-insensitive admin search.
+- Optionally enable `unaccent` extension for accent-insensitive admin search.
 
 Notes
 

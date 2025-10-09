@@ -5,7 +5,7 @@ Forms
 - Labels programmatically associated; inputs have unique `id`s.
 - Descriptive helper text and error text mapped to `aria-describedby`.
 - Keyboard operable; logical tab order; visible focus ring.
- - Set document language via `<html lang="en|es">`; localize ARIA labels/help.
+- Set document language via `<html lang="en|es">`; localize ARIA labels/help.
 
 Color & Contrast
 
@@ -20,7 +20,7 @@ Structure
 Dynamic Content
 
 - Announce validation and step changes via ARIA live regions when needed.
- - Ensure locale changes announce appropriately and do not reset focus.
+- Ensure locale changes announce appropriately and do not reset focus.
 
 Touch Targets
 
