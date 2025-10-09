@@ -3,6 +3,7 @@
 Goal: Allow base and proprietary components to integrate uniformly.
 
 Contract
+
 ```ts
 type ComponentProps<T> = {
   id: string; // field id
@@ -17,6 +18,7 @@ type ComponentProps<T> = {
 ```
 
 Manifest
+
 ```ts
 type ComponentManifest = {
   id: string; // e.g., "mui.text"
@@ -29,15 +31,25 @@ type ComponentManifest = {
 ```
 
 Registry
+
 ```ts
 interface ComponentRegistry {
-  register: (id: string, comp: React.ComponentType<any>, manifest: ComponentManifest) => void;
-  get: (id: string) => { comp: React.ComponentType<any>; manifest: ComponentManifest } | undefined;
+  register: (
+    id: string,
+    comp: React.ComponentType<any>,
+    manifest: ComponentManifest
+  ) => void;
+  get: (
+    id: string
+  ) =>
+    | { comp: React.ComponentType<any>; manifest: ComponentManifest }
+    | undefined;
   has: (id: string) => boolean;
 }
 ```
 
 Lifecycle & Guidelines
+
 - Stateless when possible; delegate state to RHF via props.
 - Must forward `id`, `aria-*` attributes, and label association.
 - Emit minimal re-renders; memoize; avoid heavy effects.
@@ -45,5 +57,5 @@ Lifecycle & Guidelines
 - Support `disabled` and read-only modes.
 
 Versioning
-- Use semantic versioning; breaking prop changes require new major version.
 
+- Use semantic versioning; breaking prop changes require new major version.

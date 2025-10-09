@@ -28,6 +28,12 @@
 - Content Store & Sync
   - JSON store `{ key: { default, locale } }`; live sync via shared store or iframe postMessage.
 
+- Theming & i18n (EN/ES)
+  - Locale provider with language switch (Accept-Language + explicit override)
+  - MUI `esES` and date locale integration; set `<html lang>`
+  - Content catalogs per locale with fallback `(tenant → locale → default)`
+  - Store `locale` and `content_version` with submissions/audit; accent-insensitive search
+
 - API & Data Layer
   - Submit endpoint validates, persists to Supabase, generates PDF, computes SHA-256, writes audit row.
   - Admin endpoints for search/detail with signed URLs to private buckets.
@@ -44,4 +50,3 @@
 
 - Release & Versioning
   - Semantic versioning for SDK/components; migration guides for schema changes.
-

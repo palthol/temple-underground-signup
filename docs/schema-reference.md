@@ -3,6 +3,7 @@
 Purpose: Define a portable form schema to render steps, fields, validation, and content keys.
 
 Top-Level
+
 ```ts
 type FormSchema = {
   id: string;
@@ -14,6 +15,7 @@ type FormSchema = {
 ```
 
 Steps
+
 ```ts
 type Step = {
   id: string;
@@ -25,6 +27,7 @@ type Step = {
 ```
 
 Sections and Fields
+
 ```ts
 type Section = {
   id: string;
@@ -45,30 +48,34 @@ type Field = {
 ```
 
 Validation
+
 ```ts
 type ValidationRule =
-  | { type: 'string'; min?: number; max?: number; patternKey?: string }
-  | { type: 'email' }
-  | { type: 'date'; minKey?: string; maxKey?: string }
-  | { type: 'boolean'; mustBe: boolean }
-  | { type: 'custom'; name: string; params?: unknown };
+  | { type: "string"; min?: number; max?: number; patternKey?: string }
+  | { type: "email" }
+  | { type: "date"; minKey?: string; maxKey?: string }
+  | { type: "boolean"; mustBe: boolean }
+  | { type: "custom"; name: string; params?: unknown };
 ```
 
 Conditions
+
 ```ts
 type Condition =
-  | { op: 'equals'; field: string; value: unknown }
-  | { op: 'notEquals'; field: string; value: unknown }
-  | { op: 'in'; field: string; values: unknown[] }
-  | { op: 'and'; conditions: Condition[] }
-  | { op: 'or'; conditions: Condition[] };
+  | { op: "equals"; field: string; value: unknown }
+  | { op: "notEquals"; field: string; value: unknown }
+  | { op: "in"; field: string; values: unknown[] }
+  | { op: "and"; conditions: Condition[] }
+  | { op: "or"; conditions: Condition[] };
 ```
 
 Content Keys
+
 - Each `...Key` points into the content store.
-- Supports locale overrides and tenant theming.
+- Supports locale overrides and tenant theming; Spanish catalogs are authored alongside English.
 
 Example (excerpt)
+
 ```json
 {
   "id": "waiver.v1",
@@ -82,8 +89,18 @@ Example (excerpt)
         {
           "id": "name",
           "fields": [
-            { "id": "participant.full_name", "component": "mui.text", "labelKey": "full_name", "required": true },
-            { "id": "participant.date_of_birth", "component": "mui.date", "labelKey": "dob", "required": true }
+            {
+              "id": "participant.full_name",
+              "component": "mui.text",
+              "labelKey": "full_name",
+              "required": true
+            },
+            {
+              "id": "participant.date_of_birth",
+              "component": "mui.date",
+              "labelKey": "dob",
+              "required": true
+            }
           ]
         }
       ]
@@ -91,4 +108,3 @@ Example (excerpt)
   ]
 }
 ```
-

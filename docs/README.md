@@ -23,3 +23,6 @@ Contents
 - Release & Versioning: `docs/release-versioning.md`
 - Operations Runbook: `docs/operations-runbook.md`
 
+Note on Localization
+
+- Spanish localization is a first-class target. The stack includes an i18n provider, locale catalogs (EN/ES), MUI `esES` and date locale integration, and audit fields for `locale` and `content_version`.
