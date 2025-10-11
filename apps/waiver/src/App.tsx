@@ -1,5 +1,11 @@
 import React from 'react';
-import { Box, Button, Container, FormControl, FormHelperText, InputLabel, MenuItem, Select, Stack, TextField, Typography } from '@mui/material';
+import { Box, Button, Container, FormControl, FormHelperText, InputLabel, MenuItem, Select, Stack, TextField, Typography, CssBaseline } from '@mui/material';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
+import { enUS, esES } from '@mui/material/locale';
+import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import dayjs from 'dayjs';
+import 'dayjs/locale/es';
 import { useForm, useWatch } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
@@ -16,7 +22,23 @@ type FormValues = {
 
 const Inner: React.FC = () => {
   const { t, locale, setLocale } = useI18n();
+  const apiBase = import.meta.env.VITE_API_URL ? String(import.meta.env.VITE_API_URL) : '';
 
+  const [apiStatus, setApiStatus] = React.useState<'unknown' | 'ok' | 'fail'>('unknown');
+  const [dbStatus, setDbStatus] = React.useState<'unknown' | 'ok' | 'fail'>('unknown');
+  React.useEffect(() => {
+    const ping = async () => {
+      try {
+        const r = await fetch(apiBase ? `${apiBase}/health` : '/health');
+        setApiStatus(r.ok ? 'ok' : 'fail');
+      } catch { setApiStatus('fail'); }
+      try {
+        const r = await fetch(apiBase ? `${apiBase}/health/deep` : '/health/deep');
+        setDbStatus(r.ok ? 'ok' : 'fail');
+      } catch { setDbStatus('fail'); }
+    };
+    ping();
+  }, [apiBase]);
   const schema = React.useMemo(
     () =>
       yup.object({
@@ -58,7 +80,7 @@ const Inner: React.FC = () => {
       content_version: 'waiver.v1',
     };
     try {
-      const res = await fetch(import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}/api/waivers/submit` : '/api/waivers/submit', {
+      const res = await fetch(apiBase ? `${apiBase}/api/waivers/submit` : '/api/waivers/submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
@@ -77,20 +99,32 @@ const Inner: React.FC = () => {
     if (firstError) setFocus(firstError as any);
   };
 
+  // Theme per locale
+  const theme = React.useMemo(() => createTheme({}, locale === 'es' ? esES : enUS), [locale]);
+  React.useEffect(() => {
+    dayjs.locale(locale === 'es' ? 'es' : 'en');
+  }, [locale]);
+
   if (success) {
     return (
-      <Container maxWidth="sm" sx={{ py: 4 }}>
-        <Stack spacing={2}>
-          <Typography variant="h5">{t('app.title')}</Typography>
-          <Typography variant="body1">Submission successful.</Typography>
-          <Typography variant="body2">Waiver ID: {success.waiverId}</Typography>
-          <Typography variant="body2">Participant ID: {success.participantId}</Typography>
-        </Stack>
-      </Container>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <Container maxWidth="sm" sx={{ py: 4 }}>
+          <Stack spacing={2}>
+            <Typography variant="h5">{t('app.title')}</Typography>
+            <Typography variant="body1">Submission successful.</Typography>
+            <Typography variant="body2">Waiver ID: {success.waiverId}</Typography>
+            <Typography variant="body2">Participant ID: {success.participantId}</Typography>
+          </Stack>
+        </Container>
+      </ThemeProvider>
     );
   }
 
   return (
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <LocalizationProvider dateAdapter={AdapterDayjs}>
     <Container maxWidth="sm" sx={{ py: 4 }}>
       <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
         <Typography variant="h5">{t('app.title')}</Typography>
@@ -102,6 +136,10 @@ const Inner: React.FC = () => {
           </Select>
         </FormControl>
       </Stack>
+      <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
+        <Typography variant="caption">API: {apiStatus}</Typography>
+        <Typography variant="caption">DB: {dbStatus}</Typography>
+      </Stack>
 
       <Box component="form" onSubmit={handleSubmit(onSubmit, onError)} noValidate>
         <Stack spacing={2}>
@@ -111,7 +149,11 @@ const Inner: React.FC = () => {
             </Typography>
           )}
           <TextField label={t('form.full_name')} {...register('full_name')} error={!!errors.full_name} helperText={errors.full_name?.message} fullWidth />
-          <TextField type="date" label={t('form.dob')} InputLabelProps={{ shrink: true }} {...register('date_of_birth')} error={!!errors.date_of_birth} helperText={errors.date_of_birth?.message} fullWidth />
+          <DatePicker
+            label={t('form.dob')}
+            onChange={(val) => setValue('date_of_birth', val ? (val as any).format('YYYY-MM-DD') : '', { shouldValidate: true })}
+            slotProps={{ textField: { error: !!errors.date_of_birth, helperText: errors.date_of_birth?.message } }}
+          />
           <TextField type="email" label={t('form.email')} {...register('email')} error={!!errors.email} helperText={errors.email?.message} fullWidth />
           <TextField type="tel" label={t('form.phone')} {...register('phone')} error={!!errors.phone} helperText={(errors as any).phone?.message} fullWidth />
 
@@ -133,6 +175,8 @@ const Inner: React.FC = () => {
         </Stack>
       </Box>
     </Container>
+      </LocalizationProvider>
+    </ThemeProvider>
   );
 };
 

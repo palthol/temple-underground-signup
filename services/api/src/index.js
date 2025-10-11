@@ -6,7 +6,13 @@ import crypto from 'node:crypto';
 import { createClient } from '@supabase/supabase-js';
 
 const app = express();
-app.use(cors());
+// CORS: allow configured origin or all in dev
+const allowedOrigin = process.env.ALLOWED_ORIGIN || '*';
+if (allowedOrigin === '*') {
+  app.use(cors());
+} else {
+  app.use(cors({ origin: allowedOrigin }));
+}
 app.use(express.json({ limit: '10mb' }));
 
 const PORT = process.env.PORT || 3001;
@@ -14,18 +20,32 @@ const PORT = process.env.PORT || 3001;
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseServiceRole = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const supabase = supabaseUrl && supabaseServiceRole ? createClient(supabaseUrl, supabaseServiceRole) : null;
+const SIGNATURES_BUCKET = process.env.SIGNATURES_BUCKET || 'signatures';
+const WAIVERS_BUCKET = process.env.WAIVERS_BUCKET || 'signed-waivers';
 
 app.get('/health', (_req, res) => res.json({ ok: true }));
+app.get('/health/deep', async (_req, res) => {
+  try {
+    if (!supabase) return res.status(500).json({ ok: false, db: false, error: 'supabase_not_configured' });
+    const { error } = await supabase.from('participants').select('id', { count: 'exact', head: true });
+    if (error) return res.status(500).json({ ok: false, db: false, error: 'db_unreachable' });
+    return res.json({ ok: true, db: true });
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ ok: false, db: false, error: 'server_error' });
+  }
+});
 
 app.post('/api/waivers/submit', async (req, res) => {
   try {
     const { participant, signature, locale = 'en', content_version = 'waiver.v1' } = req.body || {};
-    if (!participant?.full_name || !participant?.date_of_birth || !participant?.email || !participant?.phone) {
-      return res.status(400).json({ ok: false, error: 'invalid_payload' });
-    }
-    if (!signature?.pngDataUrl) {
-      return res.status(400).json({ ok: false, error: 'signature_required' });
-    }
+    const errors = [];
+    if (!participant?.full_name) errors.push({ field: 'participant.full_name', messageKey: 'validation.required' });
+    if (!participant?.date_of_birth) errors.push({ field: 'participant.date_of_birth', messageKey: 'validation.required' });
+    if (!participant?.email) errors.push({ field: 'participant.email', messageKey: 'validation.required' });
+    if (!participant?.phone) errors.push({ field: 'participant.phone', messageKey: 'validation.required' });
+    if (!signature?.pngDataUrl) errors.push({ field: 'signature', messageKey: 'validation.required' });
+    if (errors.length) return res.status(400).json({ ok: false, errors });
 
     // Ensure we have Supabase configured
     if (!supabase) {
@@ -44,7 +64,7 @@ app.post('/api/waivers/submit', async (req, res) => {
         .maybeSingle();
       if (findErr) {
         console.error('participants.find error', findErr);
-        return res.status(500).json({ ok: false, error: 'db_find_participant_failed' });
+        return res.status(500).json({ ok: false, errors: [{ field: 'participant', messageKey: 'server.db_find_participant_failed' }] });
       }
       const phone = String(participant.phone);
       if (existing?.id && (existing.cell_phone === phone || existing.home_phone === phone)) {
@@ -68,7 +88,7 @@ app.post('/api/waivers/submit', async (req, res) => {
           .single();
         if (insErr) {
           console.error('participants.insert error', insErr);
-          return res.status(500).json({ ok: false, error: 'db_insert_participant_failed' });
+          return res.status(500).json({ ok: false, errors: [{ field: 'participant', messageKey: 'server.db_insert_participant_failed' }] });
         }
         participantId = inserted.id;
       }
@@ -79,7 +99,7 @@ app.post('/api/waivers/submit', async (req, res) => {
 
     // Upload signature image if storage configured
     const png = Buffer.from(signature.pngDataUrl.split(',')[1], 'base64');
-    const signatureBucket = 'signatures'; // keep private
+    const signatureBucket = SIGNATURES_BUCKET; // keep private
     const signatureKey = `${waiverId}.png`;
     {
       const { error: upErr } = await supabase.storage
@@ -115,7 +135,7 @@ app.post('/api/waivers/submit', async (req, res) => {
     const pdfBytes = await pdfDoc.save();
     const hash = crypto.createHash('sha256').update(pdfBytes).digest('hex');
 
-    const pdfBucket = 'signed-waivers';
+    const pdfBucket = WAIVERS_BUCKET;
     const pdfKey = `${waiverId}.pdf`;
     {
       const { error: pdfErr } = await supabase.storage
