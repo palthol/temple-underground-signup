@@ -27,20 +27,65 @@ app.post('/api/waivers/submit', async (req, res) => {
       return res.status(400).json({ ok: false, error: 'signature_required' });
     }
 
-    // Persist to DB (pseudo; you will replace with Supabase SQL/insert calls)
-    const participantId = crypto.randomUUID();
+    // Ensure we have Supabase configured
+    if (!supabase) {
+      return res.status(500).json({ ok: false, error: 'supabase_not_configured' });
+    }
+
+    // Upsert/find participant by email (and optional dob)
+    let participantId;
+    {
+      const { data: existing, error: findErr } = await supabase
+        .from('participants')
+        .select('id')
+        .eq('email', participant.email)
+        .limit(1)
+        .maybeSingle();
+      if (findErr) {
+        console.error('participants.find error', findErr);
+        return res.status(500).json({ ok: false, error: 'db_find_participant_failed' });
+      }
+      if (existing?.id) {
+        participantId = existing.id;
+      } else {
+        const insertPayload = {
+          full_name: participant.full_name,
+          date_of_birth: participant.date_of_birth,
+          email: participant.email,
+          address_line: participant.address_line ?? null,
+          city: participant.city ?? null,
+          state: participant.state ?? null,
+          zip: participant.zip ?? null,
+          home_phone: participant.home_phone ?? null,
+          cell_phone: participant.cell_phone ?? null,
+        };
+        const { data: inserted, error: insErr } = await supabase
+          .from('participants')
+          .insert(insertPayload)
+          .select('id')
+          .single();
+        if (insErr) {
+          console.error('participants.insert error', insErr);
+          return res.status(500).json({ ok: false, error: 'db_insert_participant_failed' });
+        }
+        participantId = inserted.id;
+      }
+    }
+
+    // Create waiver id to use for storage keys
     const waiverId = crypto.randomUUID();
 
     // Upload signature image if storage configured
-    let signatureImageUrl = '';
-    if (supabase) {
-      const png = Buffer.from(signature.pngDataUrl.split(',')[1], 'base64');
-      const key = `signatures/${waiverId}.png`;
-      const { error } = await supabase.storage.from('signed-waivers').upload(key, png, { contentType: 'image/png', upsert: true });
-      if (error) console.error('Signature upload error', error);
-      const { data } = supabase.storage.from('signed-waivers').getPublicUrl(key);
-      signatureImageUrl = data.publicUrl; // Note: Prefer private bucket with signed URLs in production
+    const png = Buffer.from(signature.pngDataUrl.split(',')[1], 'base64');
+    const signatureBucket = 'signatures';
+    const signatureKey = `${waiverId}.png`;
+    {
+      const { error: upErr } = await supabase.storage
+        .from(signatureBucket)
+        .upload(signatureKey, png, { contentType: 'image/png', upsert: true });
+      if (upErr) console.error('Signature upload error', upErr);
     }
+    const signatureImageUrl = `${signatureBucket}/${signatureKey}`; // store object path; generate signed URL when reading
 
     // Generate PDF
     const pdfDoc = await PDFDocument.create();
@@ -68,18 +113,54 @@ app.post('/api/waivers/submit', async (req, res) => {
     const pdfBytes = await pdfDoc.save();
     const hash = crypto.createHash('sha256').update(pdfBytes).digest('hex');
 
-    let documentPdfUrl = '';
-    if (supabase) {
-      const key = `signed-waivers/${waiverId}.pdf`;
-      const { error } = await supabase.storage.from('signed-waivers').upload(key, pdfBytes, { contentType: 'application/pdf', upsert: true });
-      if (error) console.error('PDF upload error', error);
-      const { data } = supabase.storage.from('signed-waivers').getPublicUrl(key);
-      documentPdfUrl = data.publicUrl; // Note: use private + signed URL in prod
+    const pdfBucket = 'signed-waivers';
+    const pdfKey = `${waiverId}.pdf`;
+    {
+      const { error: pdfErr } = await supabase.storage
+        .from(pdfBucket)
+        .upload(pdfKey, pdfBytes, { contentType: 'application/pdf', upsert: true });
+      if (pdfErr) console.error('PDF upload error', pdfErr);
+    }
+    const documentPdfUrl = `${pdfBucket}/${pdfKey}`; // store object path; generate signed URL when reading
+
+    // Insert waiver row
+    {
+      const { error: wErr } = await supabase.from('waivers').insert({
+        id: waiverId,
+        participant_id: participantId,
+        consent_acknowledged: true, // minimal slice assumption
+        initials_risk_assumption: null,
+        initials_release: null,
+        initials_indemnification: null,
+        initials_media_release: null,
+        signature_image_url: signatureImageUrl,
+        signature_vector_json: signature.vectorJson ?? [],
+      });
+      if (wErr) console.error('waivers.insert error', wErr);
     }
 
-    // TODO: Insert rows into participants, waivers, audit_trails using Supabase client
+    // Build identity snapshot
+    const identity_snapshot = {
+      full_name: participant.full_name,
+      email: participant.email,
+      date_of_birth: participant.date_of_birth,
+    };
 
-    return res.json({ ok: true, waiverId, participantId, documentPdfUrl, sha256: hash });
+    // Insert audit row
+    {
+      const { error: aErr } = await supabase.from('audit_trails').insert({
+        participant_id: participantId,
+        waiver_id: waiverId,
+        document_pdf_url: documentPdfUrl,
+        document_sha256: hash,
+        identity_snapshot,
+        locale,
+        content_version,
+      });
+      if (aErr) console.error('audit_trails.insert error', aErr);
+    }
+
+    return res.json({ ok: true, waiverId, participantId, sha256: hash });
   } catch (e) {
     console.error(e);
     return res.status(500).json({ ok: false, error: 'server_error' });
@@ -89,4 +170,3 @@ app.post('/api/waivers/submit', async (req, res) => {
 app.listen(PORT, () => {
   console.log(`API listening on :${PORT}`);
 });
-

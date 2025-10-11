@@ -1,10 +1,21 @@
 # TODO Checklist
 
+Completed in Slice 1
+
+- Monorepo + workspaces scaffolded (`apps/*`, `services/*`)
+- Waiver app bootstrapped (Vite + React + MUI + RHF + Yup)
+- EN/ES i18n provider, language switch, `<html lang>` updates
+- SignaturePad wrapper with PNG + vector JSON
+- Minimal form (Full Name, DOB, Email) and submit flow
+- API `POST /api/waivers/submit` stub with PDF generation + SHA-256
+- Supabase migrations created (participants, waivers, audit_trails with `locale`, `content_version`)
+- Locales added: `src/locales/en.json`, `src/locales/es.json`
+
 Foundation
 
-- [ ] Choose monorepo layout: `packages/*`, `apps/*`, `services/*`
+- [x] Choose monorepo layout: `packages/*`, `apps/*`, `services/*`
 - [ ] Define shared TypeScript types for schema, content, registry
-- [ ] Set up Vite + MUI + React Hook Form + Yup baseline
+- [x] Set up Vite + MUI + React Hook Form + Yup baseline
 
 Schema & Content
 
@@ -28,7 +39,7 @@ Core Engine
 Base Components (MUI)
 
 - [ ] Text, TextArea, Select, RadioGroup, Checkbox, Date
-- [ ] SignaturePad wrapper (PNG + vector JSON)
+- [x] SignaturePad wrapper (PNG + vector JSON)
 - [ ] Stepper, Section, Fieldset, ErrorSummary
 
 External Controller
@@ -41,8 +52,8 @@ External Controller
 
 API & Persistence
 
-- [ ] Supabase schema migrations for participants/waivers/audit
-- [ ] `POST /api/waivers/submit` implementation
+- [x] Supabase schema migrations for participants/waivers/audit
+- [x] `POST /api/waivers/submit` implementation
 - [ ] PDF generation (pdf-lib), SHA‑256, upload, audit write
 - [ ] Admin endpoints and auth guard
  - [ ] Embed PDF fonts with full Latin support for Spanish diacritics
@@ -72,12 +83,12 @@ Quality
 
 Localization (Spanish)
 
-- [ ] Add i18n provider and language switch
+- [x] Add i18n provider and language switch
 - [ ] Integrate MUI `esES` and date locale (dayjs/date-fns)
-- [ ] Create `content.es.json` and fill required keys; set fallbacks
+- [x] Create `content.es.json` and fill required keys; set fallbacks
 - [ ] Persist `locale` and `content_version` in audit (and submissions if needed)
 - [ ] Accent-insensitive search in admin (Postgres `unaccent` or collation)
-- [ ] Accept and propagate `locale` through API; localize error messages when appropriate
+- [x] Accept and propagate `locale` through API; localize error messages when appropriate
 - [ ] Admin UI locale toggle and filters
 - [ ] Add `<html lang>` and localized ARIA labels; integrate MUI `esES`
 - [ ] i18n checks for missing keys and pseudo-locale overflow tests
