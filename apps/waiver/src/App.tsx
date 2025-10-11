@@ -4,7 +4,6 @@ import { useForm, useWatch } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { I18nProvider, useI18n } from './i18n';
-import React from 'react';
 const SignaturePad = React.lazy(() => import('./components/SignaturePad'));
 
 type FormValues = {
@@ -37,10 +36,11 @@ const Inner: React.FC = () => {
     handleSubmit,
     setValue,
     setFocus,
+    control,
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({ resolver: yupResolver(schema), defaultValues: { signature: { pngDataUrl: '', vectorJson: [] } as any } });
 
-  const signature = useWatch({ name: 'signature' as const, control: (undefined as any) });
+  const signature = useWatch({ name: 'signature' as const, control });
   const isSigned = !!(signature && (signature as any).pngDataUrl);
 
   const [success, setSuccess] = React.useState<{ waiverId: string; participantId: string } | null>(null);
