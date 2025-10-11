@@ -20,7 +20,7 @@ app.get('/health', (_req, res) => res.json({ ok: true }));
 app.post('/api/waivers/submit', async (req, res) => {
   try {
     const { participant, signature, locale = 'en', content_version = 'waiver.v1' } = req.body || {};
-    if (!participant?.full_name || !participant?.date_of_birth || !participant?.email) {
+    if (!participant?.full_name || !participant?.date_of_birth || !participant?.email || !participant?.phone) {
       return res.status(400).json({ ok: false, error: 'invalid_payload' });
     }
     if (!signature?.pngDataUrl) {
@@ -32,20 +32,22 @@ app.post('/api/waivers/submit', async (req, res) => {
       return res.status(500).json({ ok: false, error: 'supabase_not_configured' });
     }
 
-    // Upsert/find participant by email (and optional dob)
+    // Upsert/find participant by email + DOB + phone
     let participantId;
     {
       const { data: existing, error: findErr } = await supabase
         .from('participants')
-        .select('id')
+        .select('id, cell_phone, home_phone')
         .eq('email', participant.email)
+        .eq('date_of_birth', participant.date_of_birth)
         .limit(1)
         .maybeSingle();
       if (findErr) {
         console.error('participants.find error', findErr);
         return res.status(500).json({ ok: false, error: 'db_find_participant_failed' });
       }
-      if (existing?.id) {
+      const phone = String(participant.phone);
+      if (existing?.id && (existing.cell_phone === phone || existing.home_phone === phone)) {
         participantId = existing.id;
       } else {
         const insertPayload = {
@@ -56,8 +58,8 @@ app.post('/api/waivers/submit', async (req, res) => {
           city: participant.city ?? null,
           state: participant.state ?? null,
           zip: participant.zip ?? null,
-          home_phone: participant.home_phone ?? null,
-          cell_phone: participant.cell_phone ?? null,
+          home_phone: null,
+          cell_phone: phone,
         };
         const { data: inserted, error: insErr } = await supabase
           .from('participants')
@@ -77,7 +79,7 @@ app.post('/api/waivers/submit', async (req, res) => {
 
     // Upload signature image if storage configured
     const png = Buffer.from(signature.pngDataUrl.split(',')[1], 'base64');
-    const signatureBucket = 'signatures';
+    const signatureBucket = 'signatures'; // keep private
     const signatureKey = `${waiverId}.png`;
     {
       const { error: upErr } = await supabase.storage
@@ -161,6 +163,67 @@ app.post('/api/waivers/submit', async (req, res) => {
     }
 
     return res.json({ ok: true, waiverId, participantId, sha256: hash });
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ ok: false, error: 'server_error' });
+  }
+});
+
+// Simple admin gate: require ADMIN_API_KEY header match
+function requireAdmin(req, res, next) {
+  const key = req.header('x-admin-key');
+  if (!process.env.ADMIN_API_KEY || key !== process.env.ADMIN_API_KEY) {
+    return res.status(401).json({ ok: false, error: 'unauthorized' });
+  }
+  next();
+}
+
+// Admin: fetch waiver metadata and return signed URLs
+app.get('/api/admin/waivers/:id', requireAdmin, async (req, res) => {
+  try {
+    if (!supabase) return res.status(500).json({ ok: false, error: 'supabase_not_configured' });
+    const waiverId = req.params.id;
+
+    const { data: waiver, error: wErr } = await supabase
+      .from('waivers')
+      .select('participant_id, signature_image_url')
+      .eq('id', waiverId)
+      .maybeSingle();
+    if (wErr || !waiver) return res.status(404).json({ ok: false, error: 'not_found' });
+
+    const { data: audit, error: aErr } = await supabase
+      .from('audit_trails')
+      .select('document_pdf_url, document_sha256, locale, content_version, created_at, identity_snapshot')
+      .eq('waiver_id', waiverId)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (aErr || !audit) return res.status(404).json({ ok: false, error: 'audit_not_found' });
+
+    // Create signed URLs (5 minutes)
+    const [sigBucket, sigKey] = String(waiver.signature_image_url).split('/');
+    const [pdfBucket, pdfKey] = String(audit.document_pdf_url).split('/');
+    const expiresIn = 60 * 5;
+
+    const { data: sigSigned, error: sigErr } = await supabase.storage.from(sigBucket).createSignedUrl(sigKey, expiresIn);
+    const { data: pdfSigned, error: pdfErr } = await supabase.storage.from(pdfBucket).createSignedUrl(pdfKey, expiresIn);
+    if (sigErr || pdfErr) {
+      console.error('signed url error', sigErr || pdfErr);
+      return res.status(500).json({ ok: false, error: 'signed_url_failed' });
+    }
+
+    return res.json({
+      ok: true,
+      waiverId,
+      participantId: waiver.participant_id,
+      signatureUrl: sigSigned.signedUrl,
+      documentPdfUrl: pdfSigned.signedUrl,
+      documentSha256: audit.document_sha256,
+      locale: audit.locale,
+      content_version: audit.content_version,
+      created_at: audit.created_at,
+      identity_snapshot: audit.identity_snapshot,
+    });
   } catch (e) {
     console.error(e);
     return res.status(500).json({ ok: false, error: 'server_error' });

@@ -5,6 +5,7 @@
   "form.full_name": "Full Name",
   "form.dob": "Date of Birth",
   "form.email": "Email",
+  "form.phone": "Phone Number",
   "form.signature": "Signature",
   "form.clear_signature": "Clear",
   "form.submit": "Submit",

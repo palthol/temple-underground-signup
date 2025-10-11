@@ -10,6 +10,7 @@ type FormValues = {
   full_name: string;
   date_of_birth: string; // ISO yyyy-mm-dd
   email: string;
+  phone: string;
   signature: { pngDataUrl: string; vectorJson: any };
 };
 
@@ -22,6 +23,7 @@ const Inner: React.FC = () => {
         full_name: yup.string().required(t('validation.required')),
         date_of_birth: yup.string().required(t('validation.required')),
         email: yup.string().email(t('validation.email')).required(t('validation.required')),
+        phone: yup.string().required(t('validation.required')),
         signature: yup
           .object({ pngDataUrl: yup.string(), vectorJson: yup.mixed() })
           .test('signed', t('validation.required'), (v) => !!v && !!v.pngDataUrl),
@@ -42,6 +44,7 @@ const Inner: React.FC = () => {
         full_name: data.full_name,
         date_of_birth: data.date_of_birth,
         email: data.email,
+        phone: data.phone,
       },
       signature: data.signature,
       locale,
@@ -79,6 +82,7 @@ const Inner: React.FC = () => {
           <TextField label={t('form.full_name')} {...register('full_name')} error={!!errors.full_name} helperText={errors.full_name?.message} fullWidth />
           <TextField type="date" label={t('form.dob')} InputLabelProps={{ shrink: true }} {...register('date_of_birth')} error={!!errors.date_of_birth} helperText={errors.date_of_birth?.message} fullWidth />
           <TextField type="email" label={t('form.email')} {...register('email')} error={!!errors.email} helperText={errors.email?.message} fullWidth />
+          <TextField type="tel" label={t('form.phone')} {...register('phone')} error={!!errors.phone} helperText={(errors as any).phone?.message} fullWidth />
 
           <Box>
             <Typography variant="subtitle1" sx={{ mb: 1 }}>
@@ -106,4 +110,3 @@ const App: React.FC = () => (
 );
 
 export default App;
-
