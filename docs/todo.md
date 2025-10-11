@@ -95,9 +95,10 @@ Localization (Spanish)
 
 Frontend Incremental Patches
 
-- [ ] Fix SignaturePad event/cleanup (remove `destroy`, use `onEnd`)
-- [ ] Disable submit until signature present
-- [ ] Add ErrorSummary and focus-first-error on submit
-- [ ] Replace alert with Success screen showing reference IDs
-- [ ] Apply MUI `esES` locale in theme (wired to language switch)
-- [ ] Lazy-load SignaturePad to reduce initial bundle
+- [x] Fix SignaturePad event/cleanup (remove `destroy`, use `onEnd`)
+- [x] Disable submit until signature present
+- [x] Add ErrorSummary and focus-first-error on submit
+- [x] Replace alert with Success screen showing reference IDs
+- [x] Apply MUI `esES` locale in theme (wired to language switch)
+- [x] Lazy-load SignaturePad to reduce initial bundle
+- [x] Add Vite dev proxy for API (`/api`, `/health`) to simplify local setup
