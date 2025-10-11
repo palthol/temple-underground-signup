@@ -1,10 +1,11 @@
 import React from 'react';
 import { Box, Button, Container, FormControl, FormHelperText, InputLabel, MenuItem, Select, Stack, TextField, Typography } from '@mui/material';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { I18nProvider, useI18n } from './i18n';
-import SignaturePad from './components/SignaturePad';
+import React from 'react';
+const SignaturePad = React.lazy(() => import('./components/SignaturePad'));
 
 type FormValues = {
   full_name: string;
@@ -35,8 +36,14 @@ const Inner: React.FC = () => {
     register,
     handleSubmit,
     setValue,
+    setFocus,
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({ resolver: yupResolver(schema), defaultValues: { signature: { pngDataUrl: '', vectorJson: [] } as any } });
+
+  const signature = useWatch({ name: 'signature' as const, control: (undefined as any) });
+  const isSigned = !!(signature && (signature as any).pngDataUrl);
+
+  const [success, setSuccess] = React.useState<{ waiverId: string; participantId: string } | null>(null);
 
   const onSubmit = async (data: FormValues) => {
     const payload = {
@@ -57,12 +64,31 @@ const Inner: React.FC = () => {
         body: JSON.stringify(payload),
       });
       const json = await res.json();
-      alert(`Success: ${JSON.stringify(json)}`);
+      if (json?.ok) setSuccess({ waiverId: json.waiverId, participantId: json.participantId });
+      else alert('Submit failed');
     } catch (e) {
       console.error(e);
       alert('Submit failed');
     }
   };
+
+  const onError = () => {
+    const firstError = Object.keys(errors)[0] as keyof FormValues | undefined;
+    if (firstError) setFocus(firstError as any);
+  };
+
+  if (success) {
+    return (
+      <Container maxWidth="sm" sx={{ py: 4 }}>
+        <Stack spacing={2}>
+          <Typography variant="h5">{t('app.title')}</Typography>
+          <Typography variant="body1">Submission successful.</Typography>
+          <Typography variant="body2">Waiver ID: {success.waiverId}</Typography>
+          <Typography variant="body2">Participant ID: {success.participantId}</Typography>
+        </Stack>
+      </Container>
+    );
+  }
 
   return (
     <Container maxWidth="sm" sx={{ py: 4 }}>
@@ -77,8 +103,13 @@ const Inner: React.FC = () => {
         </FormControl>
       </Stack>
 
-      <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
+      <Box component="form" onSubmit={handleSubmit(onSubmit, onError)} noValidate>
         <Stack spacing={2}>
+          {Object.keys(errors).length > 0 && (
+            <Typography role="alert" color="error">
+              Please fix the highlighted errors before submitting.
+            </Typography>
+          )}
           <TextField label={t('form.full_name')} {...register('full_name')} error={!!errors.full_name} helperText={errors.full_name?.message} fullWidth />
           <TextField type="date" label={t('form.dob')} InputLabelProps={{ shrink: true }} {...register('date_of_birth')} error={!!errors.date_of_birth} helperText={errors.date_of_birth?.message} fullWidth />
           <TextField type="email" label={t('form.email')} {...register('email')} error={!!errors.email} helperText={errors.email?.message} fullWidth />
@@ -88,13 +119,15 @@ const Inner: React.FC = () => {
             <Typography variant="subtitle1" sx={{ mb: 1 }}>
               {t('form.signature')}
             </Typography>
-            <SignaturePad onChange={(v) => setValue('signature', v as any, { shouldValidate: true })} />
+            <React.Suspense fallback={<div>Loading signature...</div>}>
+              <SignaturePad onChange={(v) => setValue('signature', v as any, { shouldValidate: true })} />
+            </React.Suspense>
             {errors.signature && (
               <FormHelperText error>{(errors.signature as any)?.message}</FormHelperText>
             )}
           </Box>
 
-          <Button type="submit" variant="contained" disabled={isSubmitting}>
+          <Button type="submit" variant="contained" disabled={isSubmitting || !isSigned}>
             {t('form.submit')}
           </Button>
         </Stack>

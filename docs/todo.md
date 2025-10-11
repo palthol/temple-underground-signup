@@ -92,3 +92,12 @@ Localization (Spanish)
 - [ ] Admin UI locale toggle and filters
 - [ ] Add `<html lang>` and localized ARIA labels; integrate MUI `esES`
 - [ ] i18n checks for missing keys and pseudo-locale overflow tests
+
+Frontend Incremental Patches
+
+- [ ] Fix SignaturePad event/cleanup (remove `destroy`, use `onEnd`)
+- [ ] Disable submit until signature present
+- [ ] Add ErrorSummary and focus-first-error on submit
+- [ ] Replace alert with Success screen showing reference IDs
+- [ ] Apply MUI `esES` locale in theme (wired to language switch)
+- [ ] Lazy-load SignaturePad to reduce initial bundle

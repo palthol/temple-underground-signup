@@ -36,10 +36,16 @@ const SignaturePad: React.FC<Props> = ({ width = 600, height = 200, onChange }) 
         onChange?.({ pngDataUrl: '', vectorJson: [] });
       }
     };
-    pad.addEventListener('endStroke', update);
+    // Use library callback instead of addEventListener
+    const prevOnEnd = pad.onEnd;
+    pad.onEnd = () => {
+      update();
+      if (typeof prevOnEnd === 'function') prevOnEnd();
+    };
     return () => {
-      pad.off();
-      pad.destroy();
+      try { (pad as any).off?.(); } catch {}
+      try { (pad as any).onEnd = undefined; } catch {}
+      padRef.current = null;
     };
   }, [width, height, onChange]);
 
@@ -61,4 +67,3 @@ const SignaturePad: React.FC<Props> = ({ width = 600, height = 200, onChange }) 
 };
 
 export default SignaturePad;
-
