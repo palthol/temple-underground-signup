@@ -1,17 +1,16 @@
 import React from 'react'
 import { useI18n } from '../../shared/i18n/I18nProvider'
-import { WaiverWizardLayout } from '../../features/waiver/components/Wizard/Layout'
+import { WaiverWizardLayout } from '../../features/waiver/components/Wizard/WaiverWizardLayout'
 import { StepNavigation } from '../../features/waiver/components/Wizard/StepNavigation'
+import { useWaiverForm } from '../../features/waiver/hooks/useWaiverForm'
+import { useWaiverSteps } from '../../features/waiver/hooks/useWaiverSteps'
 
 export const WaiverPage: React.FC = () => {
   const { t } = useI18n()
-  const [index, setIndex] = React.useState(0)
-  const total = 7
-  const isFirst = index === 0
-  const isLast = index === total - 1
 
-  const onBack = () => setIndex((i) => Math.max(0, i - 1))
-  const onNext = () => setIndex((i) => Math.min(total - 1, i + 1))
+  const { methods, stepFields } = useWaiverForm(t)
+  const total = 7
+  const { index, isFirst, isLast, goBack, goNext } = useWaiverSteps(total)
 
   const stepTitles = [
     'Personal Information',
@@ -22,6 +21,16 @@ export const WaiverPage: React.FC = () => {
     'Signature',
     'Review & Confirm',
   ]
+
+  const onBack = () => goBack()
+  const onNext = async () => {
+    const currentStepId = (
+      ['personalInfo','emergencyContact','healthAssessment','injuryDisclosure','initialClauses','signature','review'] as const
+    )[index]
+    const valid = await methods.trigger(stepFields[currentStepId], { shouldFocus: true })
+    if (!valid) return
+    goNext()
+  }
 
   return (
     <WaiverWizardLayout
