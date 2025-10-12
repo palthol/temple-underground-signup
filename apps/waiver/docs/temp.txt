@@ -1,0 +1,22 @@
+Build 0.5 Plan
+
+Break src/App.tsx:24 into a dedicated WaiverApp wrapper that mounts WaiverWizardLayout, shares locale/API health state, and exposes a FormProvider from a new useWaiverForm hook (default values, yup schema slices, submit handler producing the current payload plus the new sections).
+Scaffold step components under src/components/forms/:
+PersonalInfoForm.tsx (name, DOB controller, address line 1/2, city, state, postal, email, phone).
+EmergencyContactForm.tsx (contact name, relationship, phone, optional email).
+HealthAssessmentForm.tsx (yes/no toggles for conditions, medication text input, anything else the flow needs).
+InjuryDisclosureForm.tsx (recent injuries list, physician clearance boolean, freeform notes).
+InitialClausesForm.tsx (four text fields for initials + acceptance checkbox).
+SignatureStep.tsx (lazy-load SignaturePad, show clear/reset, ensure data writes to form context).
+WaiverViewer.tsx (renders the legal copy, localized; show read-only summary of entered data, require a final “information is correct” checkbox before enabling submit CTA).
+Add shared UI pieces under src/components/Wizard/: WaiverWizardLayout.tsx (header, language select, API/DB badges, progress indicator), StepNavigation.tsx (Back/Next/Submit handling with disabled states), and optionally StepTracker.tsx for progress dots/titles.
+Introduce src/hooks/useWaiverForm.ts (wraps useForm, exports form, onSubmit, stepMeta), src/hooks/useWaiverSteps.ts (manages current step index, goNext, goBack, canAdvance, calls trigger with field name arrays).
+Create src/schema/waiver.ts exporting a waiverSchema plus schemaByStep object to let useWaiverSteps validate only the relevant fields. Ensure clauses/confirmations have localized messages.
+Define WaiverFormData and supporting enums in src/types/Waiver.ts and reuse across schema, components, and payload mapper (mapFormToSubmissionPayload in src/lib/waiverSubmit.ts).
+Refine locales (src/locales/en.json, src/locales/es.json) by fixing encoding issues (e.g., replace mojibake “EspaA�ol”) and adding keys for all new labels, helper text, validation, clause copy, and WaiverViewer summary strings.
+Update SignaturePad to be step-aware: accept disabled, resize on window change, export a normalized SignatureValue type. Keep lazy loading but mount it only within SignatureStep.
+Implement per-step validation and navigation in the wizard: current step’s onNext calls trigger(stepFieldNames); on success, move forward; final step uses handleSubmit to call the existing POST logic and show the success screen already in App.tsx.
+Confirm dayjs locale and Material UI theme props still originate from WaiverApp so steps stay light. Move API health ping into WaiverWizardLayout with a hook so it runs once and shares status via context.
+After componentization, ensure each step has keyboard focus management (e.g., focus first invalid field), aria labels, and that all CTAs reference localized strings.
+Testing: add unit tests for schemaByStep (valid/invalid samples per step) and lightweight component tests for navigation guard behavior (mount wizard in test, simulate step advancement). Keep tests adjacent to components (__tests__ folders).
+Once these pieces are in place, we’ll have a modular, step-driven frontend ready for build 0.5. Let me know when you want me to start implementing any specific step.
