@@ -1,0 +1,9 @@
+{
+  "app.title": "Temple Underground Waiver",
+  "wizard.language": "Language",
+  "status.api": "API",
+  "status.db": "DB",
+  "nav.back": "Back",
+  "nav.next": "Next",
+  "nav.submit": "Submit"
+}
