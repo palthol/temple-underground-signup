@@ -5,5 +5,27 @@
   "status.db": "DB",
   "nav.back": "Back",
   "nav.next": "Next",
-  "nav.submit": "Submit"
+  "nav.submit": "Submit",
+  "legalClauses": {
+    "assumption": {
+      "title": "Informed Consent / Assumption of Risk",
+      "body": "I agree to participate in one or more physical fitness program(s)/class(es) sponsored by Temple Underground Association, LLC., which may include, but not necessarily be limited to BJJ, MMA, yoga, tai chi and/or training of any kind by any affiliate, subsidiary or partnership of Temple Underground Association, LLC. Temple Underground BJJ made me fully aware that the fitness programs/classes which Temple Underground BJJ offers and in which I desire to participate are of a nature and kind that are extremely strenuous and can/may push me to the limits of my physical abilities. I recognize and understand that the programs/classes are not without varying degrees of risk which may include, but are not limited to injury to the musculoskeletal and/or cardiorespiratory systems, negligence on the part of myself or others, improper use or failure of equipment, or injury/death due to a medical condition, whether known or unknown. I willingly assume full responsibility for any and all risks I expose myself to and accept full responsibility for any injury or death that may result from participation. I certify that I know of no medical problems that would increase my risk of illness or injury, and I fully understand the possibility of adverse physical changes, including abnormal blood pressure, fainting, heart rhythm disorders, stroke, heart attack, or death. With this understanding I agree to assume all risk associated with my participation in Temple Underground BJJ fitness programs/classes."
+    },
+    "release": {
+      "title": "Release",
+      "body": "In full consideration of the above mentioned risks and hazards and the fact that I am willingly and voluntarily participating in the activities made available by Temple Underground BJJ, I hereby waive, release, remise and discharge Temple Underground BJJ and its agents, officers, principals, employees, and volunteers, of any and all liability, claims, demands, actions or rights of action, or damages of any kind related to, arising from, or in any way connected with my participation in Temple Underground BJJ fitness programs/classes, including those allegedly attributed to the negligent acts or omissions of the above mentioned parties. This agreement shall be binding upon me, my successors, representatives, heirs, executors, assigns, or transferees. If any portion of this agreement is held invalid, the remainder shall remain in full legal force and effect. If signing on behalf of a minor, I give permission for Temple Underground BJJ to administer first aid and to seek medical care as deemed necessary."
+    },
+    "indemnification": {
+      "title": "Indemnification",
+      "body": "I recognize that there is risk involved in the types of activities offered by Temple Underground BJJ. I accept financial responsibility for any injury that I or the participant may cause either to him/herself or to any other participant due to negligence. Should Temple Underground BJJ or anyone acting on their behalf be required to incur attorney’s fees and costs to enforce this agreement, I agree to reimburse them for such fees and costs. I further agree to indemnify and hold harmless Temple Underground BJJ, their principals, agents, employees, and volunteers from liability for the injury or death of any person(s) and damage to property that may result from my negligent or intentional act or omission while participating in activities offered by Temple Underground BJJ."
+    },
+    "media": {
+      "title": "Use of Picture / Film / Likeness",
+      "body": "I agree to allow Temple Underground BJJ, its agents, officers, principals, employees and volunteers to use picture(s), film and/or likeness of me for advertising purposes. If I choose not to allow the use of the same for said purpose, I agree that I must inform Temple Underground BJJ of this in writing."
+    },
+    "acknowledgement": {
+      "title": "Acknowledgement",
+      "body": "I have fully read and fully understand the foregoing assumption of risk and release of liability and I understand that by signing it obligates me to indemnify the parties named for any liability for injury or death of any person and damage to property caused by my negligent or intentional act or omission. I understand that by signing this form I am waiving valuable legal rights."
+    }
+  }
 }

@@ -21,9 +21,9 @@ const EMPTY_SIGNATURE: SignatureValue = { pngDataUrl: '', vectorJson: [] }
 export const SignatureField: React.FC<Props> = ({ value, onChange, className }) => {
   const canvasRef = React.useRef<HTMLCanvasElement | null>(null)
   const padRef = React.useRef<SignaturePad | null>(null)
-  const isSyncingRef = React.useRef(false)
+  const syncingRef = React.useRef(false)
 
-  const syncSignature = React.useCallback(() => {
+  const commitSignature = React.useCallback(() => {
     const pad = padRef.current
     if (!pad) return
     const vectorJson = pad.toData()
@@ -50,9 +50,9 @@ export const SignatureField: React.FC<Props> = ({ value, onChange, className }) 
     ctx.setTransform(1, 0, 0, 1, 0, 0)
     ctx.scale(ratio, ratio)
     if (value?.vectorJson && value.vectorJson.length) {
-      isSyncingRef.current = true
+      syncingRef.current = true
       pad.fromData(value.vectorJson as any)
-      isSyncingRef.current = false
+      syncingRef.current = false
     } else {
       pad.clear()
     }
@@ -64,31 +64,30 @@ export const SignatureField: React.FC<Props> = ({ value, onChange, className }) 
     const pad = new SignaturePad(canvas, {
       penColor: '#0f172a',
       backgroundColor: '#ffffff',
+      minWidth: 0.5,
+      maxWidth: 2.5,
     })
     padRef.current = pad
-
     const handleEnd = () => {
-      if (isSyncingRef.current) return
-      syncSignature()
+      if (syncingRef.current) return
+      commitSignature()
     }
-
     pad.addEventListener('endStroke', handleEnd)
     resizeCanvas()
-
     return () => {
       pad.removeEventListener('endStroke', handleEnd)
       pad.off()
       padRef.current = null
     }
-  }, [resizeCanvas, syncSignature])
+  }, [commitSignature, resizeCanvas])
 
   React.useEffect(() => {
     const pad = padRef.current
     if (!pad) return
     if (value?.vectorJson && value.vectorJson.length) {
-      isSyncingRef.current = true
+      syncingRef.current = true
       pad.fromData(value.vectorJson as any)
-      isSyncingRef.current = false
+      syncingRef.current = false
     } else if (!pad.isEmpty()) {
       pad.clear()
     }
