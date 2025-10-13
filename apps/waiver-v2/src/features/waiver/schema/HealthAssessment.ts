@@ -12,7 +12,7 @@ export const createHealthAssessmentSchema = (t: Translate) =>
     workouts: z.boolean(),
     medication: z.boolean(),
     alcohol: z.boolean(),
-    lastPhysical: z.string().trim().min(1, t('validation.required')),
+    lastPhysical: z.string().trim().optional().default(''),
     injuries: z
       .object({
         knees: z.boolean(),

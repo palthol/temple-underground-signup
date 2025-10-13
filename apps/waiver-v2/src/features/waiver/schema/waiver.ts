@@ -3,10 +3,8 @@ import type { FieldPath } from 'react-hook-form'
 import type { Translate } from './common'
 import { createPersonalInfoSchema } from './PersonalInfo'
 import { createEmergencyContactSchema } from './EmergencyContact'
-import { createHealthAssessmentSchema } from './HealthAssessment'
-import { createInjuryDisclosureSchema } from './InjuryDisclosure'
-import { createClausesSchema } from './Clauses'
-import { createSignatureSchema } from './Signature'
+import { createMedicalInformationSchema } from './MedicalInformation'
+import { createLegalConfirmationSchema } from './LegalConfirmation'
 import { createReviewSchema } from './Review'
 
 export const createWaiverSchema = (t: Translate) =>
@@ -14,10 +12,8 @@ export const createWaiverSchema = (t: Translate) =>
     .object({
       personalInfo: createPersonalInfoSchema(t),
       emergencyContact: createEmergencyContactSchema(t),
-      healthAssessment: createHealthAssessmentSchema(t),
-      injury: createInjuryDisclosureSchema(t),
-      clauses: createClausesSchema(t),
-      signature: createSignatureSchema(t),
+      medicalInformation: createMedicalInformationSchema(t),
+      legalConfirmation: createLegalConfirmationSchema(t),
       review: createReviewSchema(t),
     })
     .strict()
@@ -26,12 +22,25 @@ export type WaiverFormData = z.infer<ReturnType<typeof createWaiverSchema>>
 
 export type WaiverStepId =
   | 'personalInfo'
-  | 'emergencyContact'
-  | 'healthAssessment'
-  | 'injuryDisclosure'
-  | 'initialClauses'
-  | 'signature'
+  | 'medicalInformation'
+  | 'legalConfirmation'
   | 'review'
+
+export const getStepSchema = (t: Translate, stepId: WaiverStepId) => {
+  switch (stepId) {
+    case 'personalInfo':
+      return createPersonalInfoSchema(t)
+    case 'medicalInformation':
+      return createMedicalInformationSchema(t)
+    case 'legalConfirmation':
+      return createLegalConfirmationSchema(t)
+    case 'review':
+      return createReviewSchema(t)
+    default:
+      // Exhaustive check
+      return createPersonalInfoSchema(t)
+  }
+}
 
 export const stepFieldPaths: Record<WaiverStepId, FieldPath<WaiverFormData>[]> = {
   personalInfo: [
@@ -44,46 +53,43 @@ export const stepFieldPaths: Record<WaiverStepId, FieldPath<WaiverFormData>[]> =
     'personalInfo.postalCode',
     'personalInfo.email',
     'personalInfo.phone',
-  ],
-  emergencyContact: [
     'emergencyContact.name',
     'emergencyContact.relationship',
     'emergencyContact.phone',
     'emergencyContact.email',
   ],
-  healthAssessment: [
-    'healthAssessment.heartDisease',
-    'healthAssessment.shortnessOfBreath',
-    'healthAssessment.highBloodPressure',
-    'healthAssessment.smoking',
-    'healthAssessment.diabetes',
-    'healthAssessment.familyHistory',
-    'healthAssessment.workouts',
-    'healthAssessment.medication',
-    'healthAssessment.alcohol',
-    'healthAssessment.lastPhysical',
-    'healthAssessment.injuries.knees',
-    'healthAssessment.injuries.lowerBack',
-    'healthAssessment.injuries.neckShoulders',
-    'healthAssessment.injuries.hipPelvis',
-    'healthAssessment.injuries.other.has',
-    'healthAssessment.injuries.other.details',
-    'healthAssessment.exerciseRestriction',
+  medicalInformation: [
+    'medicalInformation.heartDisease',
+    'medicalInformation.shortnessOfBreath',
+    'medicalInformation.highBloodPressure',
+    'medicalInformation.smoking',
+    'medicalInformation.diabetes',
+    'medicalInformation.familyHistory',
+    'medicalInformation.workouts',
+    'medicalInformation.medication',
+    'medicalInformation.alcohol',
+    'medicalInformation.lastPhysical',
+    'medicalInformation.exerciseRestriction',
+    'medicalInformation.injuries.knees',
+    'medicalInformation.injuries.lowerBack',
+    'medicalInformation.injuries.neckShoulders',
+    'medicalInformation.injuries.hipPelvis',
+    'medicalInformation.injuries.other.has',
+    'medicalInformation.injuries.other.details',
+    'medicalInformation.hadRecentInjury',
+    'medicalInformation.injuryDetails',
+    'medicalInformation.physicianCleared',
+    'medicalInformation.clearanceNotes',
   ],
-  injuryDisclosure: [
-    'injury.hadRecentInjury',
-    'injury.injuryDetails',
-    'injury.physicianCleared',
-    'injury.clearanceNotes',
+  legalConfirmation: [
+    'legalConfirmation.riskInitials',
+    'legalConfirmation.releaseInitials',
+    'legalConfirmation.indemnificationInitials',
+    'legalConfirmation.mediaInitials',
+    'legalConfirmation.acceptedTerms',
+    'legalConfirmation.signature.pngDataUrl',
+    'legalConfirmation.signature.vectorJson',
   ],
-  initialClauses: [
-    'clauses.riskInitials',
-    'clauses.releaseInitials',
-    'clauses.indemnificationInitials',
-    'clauses.mediaInitials',
-    'clauses.acceptedTerms',
-  ],
-  signature: ['signature.pngDataUrl', 'signature.vectorJson'],
   review: ['review.confirmAccuracy'],
 }
 

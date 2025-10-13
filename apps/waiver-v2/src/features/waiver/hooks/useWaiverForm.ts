@@ -33,7 +33,7 @@ const createDefaultValues = (): WaiverFormInput => ({
     phone: '',
     email: '',
   },
-  healthAssessment: {
+  medicalInformation: {
     heartDisease: false,
     shortnessOfBreath: false,
     highBloodPressure: false,
@@ -44,6 +44,7 @@ const createDefaultValues = (): WaiverFormInput => ({
     medication: false,
     alcohol: false,
     lastPhysical: '',
+    exerciseRestriction: '',
     injuries: {
       knees: false,
       lowerBack: false,
@@ -51,22 +52,19 @@ const createDefaultValues = (): WaiverFormInput => ({
       hipPelvis: false,
       other: { has: false, details: '' },
     },
-    exerciseRestriction: '',
-  },
-  injury: {
-    hadRecentInjury: 'no' as any,
+    hadRecentInjury: 'no',
     injuryDetails: '',
-    physicianCleared: 'yes' as any,
+    physicianCleared: undefined,
     clearanceNotes: '',
   },
-  clauses: {
+  legalConfirmation: {
     riskInitials: '',
     releaseInitials: '',
     indemnificationInitials: '',
     mediaInitials: '',
     acceptedTerms: false,
+    signature: { pngDataUrl: '', vectorJson: [] },
   },
-  signature: { pngDataUrl: '', vectorJson: [] },
   review: { confirmAccuracy: false },
 })
 

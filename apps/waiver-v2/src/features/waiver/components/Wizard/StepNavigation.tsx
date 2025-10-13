@@ -8,6 +8,12 @@ type Props = {
   isSubmitting?: boolean
   onBack: () => void
   onNext: () => void
+  labels: {
+    back: string
+    next: string
+    submit: string
+    nextAlt?: string
+  }
 }
 
 export const StepNavigation: React.FC<Props> = ({
@@ -17,6 +23,7 @@ export const StepNavigation: React.FC<Props> = ({
   isSubmitting,
   onBack,
   onNext,
+  labels,
 }) => {
   const { t } = useI18n()
   return (
@@ -35,10 +42,12 @@ export const StepNavigation: React.FC<Props> = ({
         onClick={onNext}
         disabled={!!disabledNext || !!isSubmitting}
       >
-        {isLastStep ? t('nav.submit') : t('nav.next')}
+        {isLastStep ? labels.submit : labels.nextAlt ?? labels.next}
       </button>
     </div>
   )
 }
+
+export default StepNavigation
 
 
