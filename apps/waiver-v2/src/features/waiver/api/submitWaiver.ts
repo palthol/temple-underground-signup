@@ -41,23 +41,29 @@ const getApiBaseUrl = () => {
   return fromEnv.endsWith('/') ? fromEnv.slice(0, -1) : fromEnv
 }
 
+const normalizeOptional = (value: string | undefined | null) => {
+  if (typeof value !== 'string') return null
+  const trimmed = value.trim()
+  return trimmed.length ? trimmed : null
+}
+
 const mapParticipant = (input: WaiverFormInput['personalInfo']) => ({
   full_name: input.fullName,
   date_of_birth: input.dateOfBirth,
   email: input.email,
   phone: input.phone,
-  address_line: input.addressLine1,
-  address_line_2: input.addressLine2 || null,
-  city: input.city,
-  state: input.state,
-  zip: input.postalCode,
+  address_line: normalizeOptional(input.addressLine1),
+  address_line_2: normalizeOptional(input.addressLine2),
+  city: normalizeOptional(input.city),
+  state: normalizeOptional(input.state),
+  zip: normalizeOptional(input.postalCode),
 })
 
 const mapEmergencyContact = (input: WaiverFormInput['emergencyContact']) => ({
-  name: input.name || null,
-  relationship: input.relationship || null,
-  phone: input.phone || null,
-  email: input.email || null,
+  name: normalizeOptional(input.name),
+  relationship: normalizeOptional(input.relationship),
+  phone: normalizeOptional(input.phone),
+  email: normalizeOptional(input.email),
 })
 
 const mapMedicalInformation = (input: WaiverFormInput['medicalInformation']) => ({
@@ -70,8 +76,8 @@ const mapMedicalInformation = (input: WaiverFormInput['medicalInformation']) => 
   workouts: input.workouts,
   medication: input.medication,
   alcohol: input.alcohol,
-  last_physical: input.lastPhysical || null,
-  exercise_restriction: input.exerciseRestriction || null,
+  last_physical: normalizeOptional(input.lastPhysical),
+  exercise_restriction: normalizeOptional(input.exerciseRestriction),
   injuries: {
     knees: input.injuries.knees,
     lower_back: input.injuries.lowerBack,
@@ -79,13 +85,13 @@ const mapMedicalInformation = (input: WaiverFormInput['medicalInformation']) => 
     hip_pelvis: input.injuries.hipPelvis,
     other: {
       has: input.injuries.other.has,
-      details: input.injuries.other.details ? input.injuries.other.details : null,
+      details: normalizeOptional(input.injuries.other.details),
     },
   },
   had_recent_injury: input.hadRecentInjury,
-  injury_details: input.injuryDetails || null,
+  injury_details: normalizeOptional(input.injuryDetails),
   physician_cleared: input.physicianCleared ?? null,
-  clearance_notes: input.clearanceNotes || null,
+  clearance_notes: normalizeOptional(input.clearanceNotes),
 })
 
 const mapLegalConfirmation = (input: WaiverFormInput['legalConfirmation']) => ({
@@ -107,6 +113,57 @@ const buildPayload = (formData: WaiverFormInput, locale: Locale) => ({
   content_version: CONTENT_VERSION,
 })
 
+const summarizePayloadForLog = (payload: ReturnType<typeof buildPayload>) => ({
+  participant: payload.participant
+    ? {
+        full_name: Boolean(payload.participant.full_name),
+        date_of_birth: Boolean(payload.participant.date_of_birth),
+        email: Boolean(payload.participant.email),
+        phone: Boolean(payload.participant.phone),
+        address_line: Boolean(payload.participant.address_line),
+        address_line_2: Boolean(payload.participant.address_line_2),
+      }
+    : null,
+  emergency_contact: payload.emergency_contact
+    ? {
+        hasAny:
+          Boolean(payload.emergency_contact.name) ||
+          Boolean(payload.emergency_contact.relationship) ||
+          Boolean(payload.emergency_contact.phone) ||
+          Boolean(payload.emergency_contact.email),
+        name: Boolean(payload.emergency_contact.name),
+        relationship: Boolean(payload.emergency_contact.relationship),
+        phone: Boolean(payload.emergency_contact.phone),
+        email: Boolean(payload.emergency_contact.email),
+      }
+    : null,
+  medical_information: payload.medical_information
+    ? {
+        hasAny: Object.values(payload.medical_information).some((value) => value !== false && value !== null),
+        had_recent_injury: payload.medical_information.had_recent_injury,
+        injuries_other_has: payload.medical_information.injuries.other.has,
+      }
+    : null,
+  legal_confirmation: payload.legal_confirmation
+    ? {
+        accepted_terms: Boolean(payload.legal_confirmation.accepted_terms),
+        risk_initials: Boolean(payload.legal_confirmation.risk_initials),
+        release_initials: Boolean(payload.legal_confirmation.release_initials),
+        indemnification_initials: Boolean(payload.legal_confirmation.indemnification_initials),
+        media_initials: Boolean(payload.legal_confirmation.media_initials),
+      }
+    : null,
+  signature: payload.signature
+    ? {
+        hasPng: Boolean(payload.signature.pngDataUrl),
+        vectorLength: Array.isArray(payload.signature.vectorJson) ? payload.signature.vectorJson.length : undefined,
+      }
+    : null,
+  review: payload.review ? { confirm_accuracy: Boolean(payload.review.confirm_accuracy) } : null,
+  locale: payload.locale,
+  content_version: payload.content_version,
+})
+
 const tryParseJson = async (response: Response) => {
   try {
     return (await response.json()) as unknown
@@ -122,6 +179,9 @@ export const submitWaiver = async (
 ): Promise<SubmitWaiverResult> => {
   const baseUrl = getApiBaseUrl()
   const url = `${baseUrl}/api/waivers/submit`
+  const payload = buildPayload(formData, locale)
+
+  console.log('[waiver] submitting payload summary', summarizePayloadForLog(payload))
 
   try {
     const response = await fetch(url, {
@@ -129,7 +189,7 @@ export const submitWaiver = async (
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(buildPayload(formData, locale)),
+      body: JSON.stringify(payload),
     })
 
     const json = await tryParseJson(response)

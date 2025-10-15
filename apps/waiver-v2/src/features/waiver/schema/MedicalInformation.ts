@@ -14,8 +14,18 @@ export const createMedicalInformationSchema = (t: Translate) =>
       workouts: z.boolean(),
       medication: z.boolean(),
       alcohol: z.boolean(),
-      lastPhysical: z.string().trim().optional().default(''),
-      exerciseRestriction: z.string().trim().optional().default(''),
+      lastPhysical: z
+        .string()
+        .trim()
+        .optional()
+        .transform((value) => value || undefined)
+        .default(''),
+      exerciseRestriction: z
+        .string()
+        .trim()
+        .optional()
+        .transform((value) => value || undefined)
+        .default(''),
       injuries: z
         .object({
           knees: z.boolean(),
@@ -25,12 +35,17 @@ export const createMedicalInformationSchema = (t: Translate) =>
           other: z
             .object({
               has: z.boolean(),
-              details: z.string().trim().optional().default(''),
+              details: z
+                .string()
+                .trim()
+                .optional()
+                .transform((value) => value || undefined)
+                .default(''),
             })
             .superRefine((val, ctx) => {
               if (val.has && !val.details?.trim()) {
                 ctx.addIssue({
-                  code: z.ZodIssueCode.custom,
+                  code: 'custom',
                   path: ['details'],
                   message: t('validation.required'),
                 })
@@ -39,14 +54,29 @@ export const createMedicalInformationSchema = (t: Translate) =>
         })
         .strict(),
       hadRecentInjury: yesNoSchema,
-      injuryDetails: z.string().trim().optional().default(''),
-      physicianCleared: yesNoSchema.optional(),
-      clearanceNotes: z.string().trim().optional().default(''),
+      injuryDetails: z
+        .string()
+        .trim()
+        .optional()
+        .transform((value) => value || undefined)
+        .default(''),
+      physicianCleared: z
+        .string()
+        .trim()
+        .transform((value) => (value.length ? value : undefined))
+        .optional()
+        .pipe(yesNoSchema.optional()),
+      clearanceNotes: z
+        .string()
+        .trim()
+        .optional()
+        .transform((value) => value || undefined)
+        .default(''),
     })
     .superRefine((value, ctx) => {
       if (value.hadRecentInjury === 'yes' && !value.injuryDetails?.trim()) {
         ctx.addIssue({
-          code: z.ZodIssueCode.custom,
+          code: 'custom',
           path: ['injuryDetails'],
           message: t('validation.required'),
         })

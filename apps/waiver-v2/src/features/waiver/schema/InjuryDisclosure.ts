@@ -11,7 +11,7 @@ export const createInjuryDisclosureSchema = (t: Translate) =>
   }).superRefine((value, ctx) => {
     if (value.hadRecentInjury === 'yes' && !value.injuryDetails?.trim()) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: 'custom',
         path: ['injuryDetails'],
         message: t('validation.required'),
       })

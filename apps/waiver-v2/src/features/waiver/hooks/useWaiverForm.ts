@@ -10,6 +10,12 @@ type WaiverSchema = ReturnType<typeof createWaiverSchema>
 export type WaiverFormInput = z.input<WaiverSchema>
 export type WaiverFormData = z.output<WaiverSchema>
 
+declare global {
+  interface Window {
+    __waiverFormDebug?: () => UseFormReturn<WaiverFormInput>
+  }
+}
+
 export type UseWaiverFormReturn = {
   methods: UseFormReturn<WaiverFormInput>
   stepFields: typeof stepFieldPaths
@@ -77,6 +83,10 @@ export const useWaiverForm = (t: Translate) => {
     mode: 'onBlur',
     defaultValues,
   })
+
+  if (typeof window !== 'undefined') {
+    window.__waiverFormDebug = () => methods
+  }
 
   return React.useMemo(
     () => ({ methods, stepFields: stepFieldPaths }),

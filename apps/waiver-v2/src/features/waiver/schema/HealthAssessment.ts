@@ -26,7 +26,7 @@ export const createHealthAssessmentSchema = (t: Translate) =>
           })
           .superRefine((val, ctx) => {
             if (val.has && !val.details?.trim()) {
-              ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['details'], message: t('validation.required') })
+              ctx.addIssue({ code: 'custom', path: ['details'], message: t('validation.required') })
             }
           }),
       })
