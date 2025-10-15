@@ -6,6 +6,26 @@
   "nav.back": "Back",
   "nav.next": "Next",
   "nav.submit": "Submit",
+  "nav.submitting": "Submitting…",
+  "submission": {
+    "error": {
+      "generic": "We ran into a problem submitting your waiver. Please try again.",
+      "network": "We could not reach the server. Check your connection and try again.",
+      "validation": "Please review the highlighted fields and try again."
+    },
+    "success": {
+      "title": "Waiver submitted successfully",
+      "body": "You will receive a confirmation email once the waiver is processed. Thank you for completing your submission."
+    },
+    "details": {
+      "waiverId": "Waiver Reference ID",
+      "participantId": "Participant ID",
+      "sha256": "Document SHA-256"
+    },
+    "actions": {
+      "new": "Submit another waiver"
+    }
+  },
   "legalClauses": {
     "assumption": {
       "title": "Informed Consent / Assumption of Risk",

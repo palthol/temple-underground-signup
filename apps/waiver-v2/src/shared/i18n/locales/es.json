@@ -5,5 +5,25 @@
   "status.db": "BD",
   "nav.back": "Atrás",
   "nav.next": "Siguiente",
-  "nav.submit": "Enviar"
+  "nav.submit": "Enviar",
+  "nav.submitting": "Enviando…",
+  "submission": {
+    "error": {
+      "generic": "Ocurrió un problema al enviar tu exención. Inténtalo nuevamente.",
+      "network": "No pudimos contactar al servidor. Verifica tu conexión e inténtalo nuevamente.",
+      "validation": "Revisa los campos destacados e inténtalo de nuevo."
+    },
+    "success": {
+      "title": "Exención enviada correctamente",
+      "body": "Recibirás un correo de confirmación cuando la exención sea procesada. Gracias por completar tu envío."
+    },
+    "details": {
+      "waiverId": "ID de referencia de la exención",
+      "participantId": "ID del participante",
+      "sha256": "SHA-256 del documento"
+    },
+    "actions": {
+      "new": "Enviar otra exención"
+    }
+  }
 }
