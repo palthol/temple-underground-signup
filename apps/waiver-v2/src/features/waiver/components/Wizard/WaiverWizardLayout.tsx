@@ -15,9 +15,9 @@ type Props = {
 }
 
 const statusColor = (status: ServiceStatus) => {
-  if (status === 'ok') return 'text-emerald-600'
-  if (status === 'fail') return 'text-red-600'
-  return 'text-gray-500'
+  if (status === 'ok') return 'text-brand-gold'
+  if (status === 'fail') return 'text-brand-red'
+  return 'text-brand-light'
 }
 
 export const WaiverWizardLayout: React.FC<Props> = ({
@@ -30,15 +30,15 @@ export const WaiverWizardLayout: React.FC<Props> = ({
   const { t, locale, setLocale } = useI18n()
 
   return (
-    <div className="mx-auto max-w-screen-sm p-6 space-y-4">
+    <div className="mx-auto max-w-screen-md space-y-6 p-6">
       <header className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">{title}</h1>
-        <label className="text-sm">
+        <h1 className="text-2xl font-semibold text-brand-light">{title}</h1>
+        <label className="text-sm text-brand-light">
           <span className="mr-2">{t('wizard.language')}</span>
           <select
             value={locale}
             onChange={(e) => setLocale(e.target.value as any)}
-            className="rounded-md border-gray-300 text-sm"
+            className="rounded-md border-brand-bronze bg-brand-dark text-sm text-brand-light focus:border-brand-gold focus:ring-brand-gold"
           >
             <option value="en">English</option>
             <option value="es">Español</option>
@@ -47,7 +47,7 @@ export const WaiverWizardLayout: React.FC<Props> = ({
       </header>
 
       {statuses && (
-        <div className="flex gap-4 text-xs">
+        <div className="flex gap-4 text-xs text-brand-light">
           <span className={statusColor(statuses.apiStatus)}>
             {t('status.api')}: {statuses.apiStatus}
           </span>
@@ -58,15 +58,15 @@ export const WaiverWizardLayout: React.FC<Props> = ({
       )}
 
       {(stepTitle || stepIndicator) && (
-        <div>
+        <div className="space-y-1">
           {stepIndicator && (
-            <div className="text-xs text-gray-500">{stepIndicator}</div>
+            <div className="text-xs text-brand-gold">{stepIndicator}</div>
           )}
-          {stepTitle && <div className="text-lg font-medium">{stepTitle}</div>}
+          {stepTitle && <div className="text-lg font-semibold text-brand-light">{stepTitle}</div>}
         </div>
       )}
 
-      <section className="rounded-md border bg-white p-4 shadow-sm">{children}</section>
+      <section className="space-y-6 rounded-2xl bg-brand-mid p-6 shadow-lg">{children}</section>
     </div>
   )
 }

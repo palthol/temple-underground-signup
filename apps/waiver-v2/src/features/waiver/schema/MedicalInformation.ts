@@ -2,8 +2,8 @@ import { z } from 'zod'
 import type { Translate } from './common'
 import { yesNoSchema } from './common'
 
-export const createMedicalInformationSchema = (t: Translate) =>
-  z
+export const createMedicalInformationSchema = (t: Translate) => {
+  const baseSchema = z
     .object({
       heartDisease: z.boolean(),
       shortnessOfBreath: z.boolean(),
@@ -82,6 +82,20 @@ export const createMedicalInformationSchema = (t: Translate) =>
         })
       }
     })
+
+  return z.preprocess((input) => {
+    if (input && typeof input === 'object') {
+      const draft = { ...(input as Record<string, unknown>) }
+      if (draft.hadRecentInjury === 'no') {
+        draft.injuryDetails = ''
+        draft.physicianCleared = undefined
+        draft.clearanceNotes = ''
+      }
+      return draft
+    }
+    return input
+  }, baseSchema)
+}
 
 
 

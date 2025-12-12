@@ -17,6 +17,19 @@
     "notAnswered": "Sin respuesta",
     "missingDetails": "Faltan detalles"
   },
+  "validation": {
+    "required": "Este campo es obligatorio.",
+    "email": "Ingresa un correo válido.",
+    "initials_length": "Ingresa exactamente dos letras.",
+    "accept_terms": "Debes aceptar los términos.",
+    "signature_required": "Se requiere una firma.",
+    "confirm_accuracy": "Confirma que la información es correcta."
+  },
+  "form": {
+    "required": "Obligatorio",
+    "optional": "Opcional",
+    "requiredCaption": "Los campos marcados como Obligatorio deben completarse antes de enviar."
+  },
   "submission": {
     "error": {
       "generic": "Ocurrió un problema al enviar tu exención. Inténtalo nuevamente.",
@@ -42,6 +55,7 @@
   "personalInfo": {
     "title": "Información personal y de emergencia",
     "description": "Esta información nos ayuda a identificarte y a contactar a alguien si es necesario.",
+    "requiredBadge": "Obligatorio",
     "fields": {
       "fullName": "Nombre completo",
       "dateOfBirth": "Fecha de nacimiento",
@@ -125,7 +139,10 @@
   "review": {
     "title": "Revisar y enviar",
     "description": "Verifica que todo sea correcto antes de enviar.",
-    "confirmAccuracy": "Confirmo que la información proporcionada es exacta y acepto enviarla electrónicamente."
+    "confirmAccuracy": "Confirmo que la información proporcionada es exacta y acepto enviarla electrónicamente.",
+    "notProvided": "Sin información",
+    "signatureMissing": "Firma no capturada",
+    "requiredBadge": "Obligatorio"
   },
   "legalClauses": {
     "assumption": {

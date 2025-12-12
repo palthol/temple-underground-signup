@@ -17,6 +17,19 @@
     "notAnswered": "Not answered",
     "missingDetails": "Details missing"
   },
+  "validation": {
+    "required": "This field is required.",
+    "email": "Enter a valid email.",
+    "initials_length": "Enter exactly two letters.",
+    "accept_terms": "You must accept the terms.",
+    "signature_required": "Signature is required.",
+    "confirm_accuracy": "Please confirm the information is accurate."
+  },
+  "form": {
+    "required": "Required",
+    "optional": "Optional",
+    "requiredCaption": "Fields marked Required must be completed before submitting."
+  },
   "submission": {
     "error": {
       "generic": "We ran into a problem submitting your waiver. Please try again.",
@@ -42,6 +55,7 @@
   "personalInfo": {
     "title": "Personal & Emergency Information",
     "description": "This information helps us identify you and reach someone if we need to.",
+    "requiredBadge": "Required",
     "fields": {
       "fullName": "Full name",
       "dateOfBirth": "Date of birth",
@@ -125,7 +139,10 @@
   "review": {
     "title": "Review and submit",
     "description": "Verify everything looks correct before you submit.",
-    "confirmAccuracy": "I confirm the information provided is accurate and I agree to submit electronically."
+    "confirmAccuracy": "I confirm the information provided is accurate and I agree to submit electronically.",
+    "notProvided": "Not provided",
+    "signatureMissing": "Signature not captured",
+    "requiredBadge": "Required"
   },
   "legalClauses": {
     "assumption": {
