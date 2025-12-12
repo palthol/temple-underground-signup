@@ -3,6 +3,6 @@
 @tailwind utilities;
 
 /* app-level base styles */
-html, body, #root { height: 100%; }
+html, body, #app { height: 100%; }
 
 
