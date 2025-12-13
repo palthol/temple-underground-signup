@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "node --watch src/index.js",
+    "build": "echo 'API has no build step'",
     "start": "node src/index.js"
   },
   "dependencies": {
