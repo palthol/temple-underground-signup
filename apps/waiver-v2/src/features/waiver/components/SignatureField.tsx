@@ -104,7 +104,7 @@ export const SignatureField: React.FC<Props> = ({ value, onChange, className }) 
         ref={canvasRef}
         width={CANVAS_WIDTH}
         height={CANVAS_HEIGHT}
-        className="h-48 w-full touch-none"
+        className="h-48 w-full touch-none rounded-md border border-slate-300 bg-white"
         aria-label="Signature pad"
       />
       <div className="mt-2 flex justify-between">
