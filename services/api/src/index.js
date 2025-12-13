@@ -23,6 +23,117 @@ const supabase = supabaseUrl && supabaseServiceRole ? createClient(supabaseUrl, 
 const SIGNATURES_BUCKET = process.env.SIGNATURES_BUCKET || 'signatures';
 const WAIVERS_BUCKET = process.env.WAIVERS_BUCKET || 'signed-waivers';
 
+const normalizeString = (value) => {
+  if (typeof value !== 'string') return null;
+  const trimmed = value.trim();
+  return trimmed.length ? trimmed : null;
+};
+
+const yesNoToBoolean = (value) => {
+  if (typeof value !== 'string') return null;
+  const lower = value.trim().toLowerCase();
+  if (lower === 'yes') return true;
+  if (lower === 'no') return false;
+  return null;
+};
+
+const hasEmergencyContactDetails = (contact) => {
+  if (!contact || typeof contact !== 'object') return false;
+  return Boolean(
+    normalizeString(contact.name) ||
+      normalizeString(contact.relationship) ||
+      normalizeString(contact.phone) ||
+      normalizeString(contact.email)
+  );
+};
+
+const buildMedicalHistoryPayload = (waiverId, medical) => {
+  if (!medical || typeof medical !== 'object') return null;
+  const injuries = medical.injuries && typeof medical.injuries === 'object' ? medical.injuries : {};
+  const otherInjury = injuries.other && typeof injuries.other === 'object' ? injuries.other : {};
+  const hadRecentInjury = yesNoToBoolean(medical.had_recent_injury);
+  const physicianCleared = yesNoToBoolean(medical.physician_cleared);
+
+  return {
+    waiver_id: waiverId,
+    heart_disease: Boolean(medical.heart_disease),
+    shortness_of_breath: Boolean(medical.shortness_of_breath),
+    high_blood_pressure: Boolean(medical.high_blood_pressure),
+    smoking: Boolean(medical.smoking),
+    diabetes: Boolean(medical.diabetes),
+    family_history: Boolean(medical.family_history),
+    workouts: Boolean(medical.workouts),
+    medication: Boolean(medical.medication),
+    alcohol: Boolean(medical.alcohol),
+    last_physical: normalizeString(medical.last_physical),
+    exercise_restriction: normalizeString(medical.exercise_restriction),
+    injuries_knees: Boolean(injuries.knees),
+    injuries_lower_back: Boolean(injuries.lower_back),
+    injuries_neck_shoulders: Boolean(injuries.neck_shoulders),
+    injuries_hip_pelvis: Boolean(injuries.hip_pelvis),
+    injuries_other_has: Boolean(otherInjury.has),
+    injuries_other_details: normalizeString(otherInjury.details),
+    had_recent_injury: hadRecentInjury ?? false,
+    injury_details: normalizeString(medical.injury_details),
+    physician_cleared: physicianCleared,
+    clearance_notes: normalizeString(medical.clearance_notes),
+  };
+};
+
+const summarizePayload = (body) => {
+  if (!body || typeof body !== 'object') return { hasBody: false };
+  const participant = body.participant && typeof body.participant === 'object' ? body.participant : null;
+  const emergency = body.emergency_contact && typeof body.emergency_contact === 'object' ? body.emergency_contact : null;
+  const medical = body.medical_information && typeof body.medical_information === 'object' ? body.medical_information : null;
+  const legal = body.legal_confirmation && typeof body.legal_confirmation === 'object' ? body.legal_confirmation : null;
+  const signature = body.signature && typeof body.signature === 'object' ? body.signature : null;
+  const review = body.review && typeof body.review === 'object' ? body.review : null;
+
+  return {
+    participant: participant
+      ? {
+          full_name: Boolean(participant.full_name),
+          date_of_birth: Boolean(participant.date_of_birth),
+          email: Boolean(participant.email),
+          phone: Boolean(participant.phone),
+          address_line: Boolean(participant.address_line),
+        }
+      : null,
+    emergency_contact: emergency
+      ? {
+          name: Boolean(emergency.name),
+          relationship: Boolean(emergency.relationship),
+          phone: Boolean(emergency.phone),
+          email: Boolean(emergency.email),
+        }
+      : null,
+    medical_information: medical
+      ? {
+          keys: Object.keys(medical).length,
+          injuries: typeof medical.injuries === 'object' ? Object.keys(medical.injuries) : null,
+        }
+      : null,
+    legal_confirmation: legal
+      ? {
+          accepted_terms: Boolean(legal.accepted_terms),
+          risk_initials: Boolean(legal.risk_initials),
+          release_initials: Boolean(legal.release_initials),
+          indemnification_initials: Boolean(legal.indemnification_initials),
+          media_initials: Boolean(legal.media_initials),
+        }
+      : null,
+    signature: signature
+      ? {
+          pngDataUrl: Boolean(signature.pngDataUrl),
+          vectorJsonLength: Array.isArray(signature.vectorJson) ? signature.vectorJson.length : undefined,
+        }
+      : null,
+    review: review ? { confirm_accuracy: Boolean(review.confirm_accuracy) } : null,
+    locale: typeof body.locale === 'string',
+    content_version: typeof body.content_version === 'string',
+  };
+};
+
 app.get('/health', (_req, res) => res.json({ ok: true }));
 app.get('/health/deep', async (_req, res) => {
   try {
@@ -38,12 +149,28 @@ app.get('/health/deep', async (_req, res) => {
 
 app.post('/api/waivers/submit', async (req, res) => {
   try {
-    const { participant, signature, locale = 'en', content_version = 'waiver.v1' } = req.body || {};
+    console.log('waiver.submit payload summary', summarizePayload(req.body));
+    const {
+      participant,
+      signature,
+      emergency_contact: emergencyContact,
+      medical_information: medicalInformation,
+      legal_confirmation: legalConfirmation,
+      review,
+      locale = 'en',
+      content_version = 'waiver.v1',
+    } = req.body || {};
     const errors = [];
     if (!participant?.full_name) errors.push({ field: 'participant.full_name', messageKey: 'validation.required' });
     if (!participant?.date_of_birth) errors.push({ field: 'participant.date_of_birth', messageKey: 'validation.required' });
     if (!participant?.email) errors.push({ field: 'participant.email', messageKey: 'validation.required' });
     if (!participant?.phone) errors.push({ field: 'participant.phone', messageKey: 'validation.required' });
+    if (!legalConfirmation?.accepted_terms) errors.push({ field: 'legal_confirmation.accepted_terms', messageKey: 'validation.required' });
+    if (!legalConfirmation?.risk_initials) errors.push({ field: 'legal_confirmation.risk_initials', messageKey: 'validation.required' });
+    if (!legalConfirmation?.release_initials) errors.push({ field: 'legal_confirmation.release_initials', messageKey: 'validation.required' });
+    if (!legalConfirmation?.indemnification_initials)
+      errors.push({ field: 'legal_confirmation.indemnification_initials', messageKey: 'validation.required' });
+    if (!legalConfirmation?.media_initials) errors.push({ field: 'legal_confirmation.media_initials', messageKey: 'validation.required' });
     if (!signature?.pngDataUrl) errors.push({ field: 'signature', messageKey: 'validation.required' });
     if (errors.length) return res.status(400).json({ ok: false, errors });
 
@@ -150,15 +277,37 @@ app.post('/api/waivers/submit', async (req, res) => {
       const { error: wErr } = await supabase.from('waivers').insert({
         id: waiverId,
         participant_id: participantId,
-        consent_acknowledged: true, // minimal slice assumption
-        initials_risk_assumption: null,
-        initials_release: null,
-        initials_indemnification: null,
-        initials_media_release: null,
+        consent_acknowledged: Boolean(legalConfirmation?.accepted_terms),
+        initials_risk_assumption: legalConfirmation?.risk_initials ?? null,
+        initials_release: legalConfirmation?.release_initials ?? null,
+        initials_indemnification: legalConfirmation?.indemnification_initials ?? null,
+        initials_media_release: legalConfirmation?.media_initials ?? null,
         signature_image_url: signatureImageUrl,
         signature_vector_json: signature.vectorJson ?? [],
+        review_confirm_accuracy: Boolean(review?.confirm_accuracy),
       });
       if (wErr) console.error('waivers.insert error', wErr);
+    }
+
+    // Upsert emergency contact if provided
+    if (hasEmergencyContactDetails(emergencyContact)) {
+      const emergencyPayload = {
+        waiver_id: waiverId,
+        participant_id: participantId,
+        name: normalizeString(emergencyContact.name),
+        relationship: normalizeString(emergencyContact.relationship),
+        phone: normalizeString(emergencyContact.phone),
+        email: normalizeString(emergencyContact.email),
+      };
+      const { error: ecErr } = await supabase.from('emergency_contacts').insert(emergencyPayload);
+      if (ecErr) console.error('emergency_contacts.insert error', ecErr);
+    }
+
+    // Insert medical history details
+    const medicalPayload = buildMedicalHistoryPayload(waiverId, medicalInformation);
+    if (medicalPayload) {
+      const { error: mhErr } = await supabase.from('waiver_medical_histories').insert(medicalPayload);
+      if (mhErr) console.error('waiver_medical_histories.insert error', mhErr);
     }
 
     // Build identity snapshot
