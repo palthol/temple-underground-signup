@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>{{document.title}}</title>
+    <style>
+      :root {
+        color-scheme: light;
+        font-family: 'Roboto', 'Segoe UI', system-ui, -apple-system, sans-serif;
+        --md-surface: #ffffff;
+        --md-surface-variant: #f4f6f8;
+        --md-outline: #c2c7cc;
+        --md-on-surface: #1b1d1f;
+        --md-primary: #1d4ed8;
+        --md-primary-on-container: #0c1b4a;
+        --md-secondary: #475569;
+        --md-spacing-lg: 32px;
+        --md-spacing-md: 20px;
+        --md-spacing-sm: 12px;
+        --md-spacing-xs: 6px;
+        --md-radius-lg: 18px;
+        --md-radius-md: 12px;
+        --md-radius-sm: 8px;
+      }
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        padding: var(--md-spacing-lg);
+        background-color: #f8fafc;
+        color: var(--md-on-surface);
+        font-size: 12px;
+        line-height: 1.6;
+      }
+
+      .document {
+        background: var(--md-surface);
+        border-radius: var(--md-radius-lg);
+        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        min-height: 100%;
+      }
+
+      .document__header {
+        padding: var(--md-spacing-lg);
+        background: linear-gradient(135deg, #1e40af, #0f172a);
+        color: #f8fafc;
+        display: flex;
+        justify-content: space-between;
+        gap: var(--md-spacing-lg);
+      }
+
+      .document__header-brand {
+        display: flex;
+        flex-direction: column;
+        gap: var(--md-spacing-xs);
+      }
+
+      .document__header-brand h1 {
+        margin: 0;
+        font-size: 24px;
+        font-weight: 600;
+        letter-spacing: 0.01em;
+      }
+
+      .document__header-brand span {
+        font-size: 12px;
+        opacity: 0.85;
+      }
+
+      .document__metadata {
+        display: grid;
+        grid-template-columns: repeat(2, auto);
+        gap: var(--md-spacing-sm);
+        align-content: start;
+        background: rgba(15, 23, 42, 0.35);
+        border-radius: var(--md-radius-md);
+        padding: var(--md-spacing-sm) var(--md-spacing-md);
+      }
+
+      .document__metadata dt {
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 10px;
+        opacity: 0.75;
+      }
+
+      .document__metadata dd {
+        margin: 0;
+        font-size: 12px;
+        font-weight: 500;
+      }
+
+      .document__content {
+        padding: var(--md-spacing-lg);
+        display: flex;
+        flex-direction: column;
+        gap: var(--md-spacing-lg);
+      }
+
+      .section {
+        border: 1px solid var(--md-outline);
+        border-radius: var(--md-radius-md);
+        background: var(--md-surface);
+        overflow: hidden;
+      }
+
+      .section__header {
+        background: var(--md-surface-variant);
+        padding: var(--md-spacing-sm) var(--md-spacing-md);
+        font-size: 14px;
+        font-weight: 600;
+        letter-spacing: 0.01em;
+      }
+
+      .section__body {
+        padding: var(--md-spacing-md);
+        display: flex;
+        flex-direction: column;
+        gap: var(--md-spacing-sm);
+      }
+
+      .field-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: var(--md-spacing-sm) var(--md-spacing-md);
+      }
+
+      .field {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .field__label {
+        font-size: 10px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--md-secondary);
+        font-weight: 600;
+      }
+
+      .field__value {
+        font-size: 12px;
+        font-weight: 500;
+        color: var(--md-on-surface);
+        word-break: break-word;
+      }
+
+      .chip-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--md-spacing-xs);
+        padding: 0;
+        margin: 0;
+        list-style: none;
+      }
+
+      .chip {
+        padding: 6px 10px;
+        border-radius: var(--md-radius-sm);
+        border: 1px solid var(--md-outline);
+        background: var(--md-surface-variant);
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        color: var(--md-secondary);
+      }
+
+      .chip--active {
+        background: rgba(29, 78, 216, 0.12);
+        border-color: rgba(29, 78, 216, 0.35);
+        color: var(--md-primary-on-container);
+      }
+
+      .legal-text {
+        display: flex;
+        flex-direction: column;
+        gap: var(--md-spacing-sm);
+        font-size: 11px;
+        color: var(--md-secondary);
+      }
+
+      .legal-text h3 {
+        margin: 0;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--md-primary-on-container);
+      }
+
+      .signature-block {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: var(--md-spacing-md);
+      }
+
+      .signature {
+        border-top: 1px dashed var(--md-outline);
+        padding-top: var(--md-spacing-sm);
+        display: flex;
+        flex-direction: column;
+        gap: var(--md-spacing-xs);
+      }
+
+      .signature img {
+        max-height: 90px;
+        max-width: 100%;
+        object-fit: contain;
+      }
+
+      .signature__caption {
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--md-secondary);
+      }
+
+      .document__footer {
+        padding: var(--md-spacing-md) var(--md-spacing-lg);
+        background: var(--md-surface-variant);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 10px;
+        color: var(--md-secondary);
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 10px;
+        border-radius: var(--md-radius-sm);
+        background: rgba(15, 23, 42, 0.08);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      .badge--primary {
+        background: rgba(29, 78, 216, 0.12);
+        color: var(--md-primary-on-container);
+      }
+
+      .divider {
+        width: 100%;
+        height: 1px;
+        background: var(--md-outline);
+        margin: var(--md-spacing-xs) 0;
+      }
+    </style>
+  </head>
+  <body>
+    <article class="document">
+      <header class="document__header">
+        <div class="document__header-brand">
+          <h1>{{organization.name}}</h1>
+          <span>{{organization.tagline}}</span>
+          <span>{{organization.address}}</span>
+        </div>
+        <dl class="document__metadata">
+          <dt>Document</dt>
+          <dd>{{document.title}}</dd>
+          <dt>Waiver ID</dt>
+          <dd>{{waiver.id}}</dd>
+          <dt>Participant ID</dt>
+          <dd>{{participant.id}}</dd>
+          <dt>Signed</dt>
+          <dd>{{waiver.signedAt}}</dd>
+          <dt>Template Version</dt>
+          <dd>{{document.version}}</dd>
+        </dl>
+      </header>
+
+      <main class="document__content">
+        <section class="section">
+          <div class="section__header">Participant Information</div>
+          <div class="section__body field-grid">
+            <div class="field">
+              <div class="field__label">Full Name</div>
+              <div class="field__value">{{participant.fullName}}</div>
+            </div>
+            <div class="field">
+              <div class="field__label">Date of Birth</div>
+              <div class="field__value">{{participant.dateOfBirth}}</div>
+            </div>
+            <div class="field">
+              <div class="field__label">Email</div>
+              <div class="field__value">{{participant.email}}</div>
+            </div>
+            <div class="field">
+              <div class="field__label">Phone</div>
+              <div class="field__value">{{participant.phone}}</div>
+            </div>
+            <div class="field">
+              <div class="field__label">Address</div>
+              <div class="field__value">{{participant.addressLine}}</div>
+            </div>
+            <div class="field">
+              <div class="field__label">City / State / Zip</div>
+              <div class="field__value">{{participant.cityStateZip}}</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="section__header">Emergency Contact</div>
+          <div class="section__body field-grid">
+            <div class="field">
+              <div class="field__label">Name</div>
+              <div class="field__value">{{emergencyContact.name}}</div>
+            </div>
+            <div class="field">
+              <div class="field__label">Relationship</div>
+              <div class="field__value">{{emergencyContact.relationship}}</div>
+            </div>
+            <div class="field">
+              <div class="field__label">Phone</div>
+              <div class="field__value">{{emergencyContact.phone}}</div>
+            </div>
+            <div class="field">
+              <div class="field__label">Email</div>
+              <div class="field__value">{{emergencyContact.email}}</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="section__header">Medical Information</div>
+          <div class="section__body">
+            <div class="field-grid">
+              <div class="field">
+                <div class="field__label">Heart Disease</div>
+                <div class="field__value">{{medicalInformation.heartDisease}}</div>
+              </div>
+              <div class="field">
+                <div class="field__label">Shortness of Breath</div>
+                <div class="field__value">{{medicalInformation.shortnessOfBreath}}</div>
+              </div>
+              <div class="field">
+                <div class="field__label">High Blood Pressure</div>
+                <div class="field__value">{{medicalInformation.highBloodPressure}}</div>
+              </div>
+              <div class="field">
+                <div class="field__label">Smoking</div>
+                <div class="field__value">{{medicalInformation.smoking}}</div>
+              </div>
+              <div class="field">
+                <div class="field__label">Diabetes</div>
+                <div class="field__value">{{medicalInformation.diabetes}}</div>
+              </div>
+              <div class="field">
+                <div class="field__label">Family History</div>
+                <div class="field__value">{{medicalInformation.familyHistory}}</div>
+              </div>
+              <div class="field">
+                <div class="field__label">Workouts</div>
+                <div class="field__value">{{medicalInformation.workouts}}</div>
+              </div>
+              <div class="field">
+                <div class="field__label">Medication</div>
+                <div class="field__value">{{medicalInformation.medication}}</div>
+              </div>
+              <div class="field">
+                <div class="field__label">Alcohol</div>
+                <div class="field__value">{{medicalInformation.alcohol}}</div>
+              </div>
+              <div class="field">
+                <div class="field__label">Last Physical</div>
+                <div class="field__value">{{medicalInformation.lastPhysical}}</div>
+              </div>
+              <div class="field">
+                <div class="field__label">Exercise Restrictions</div>
+                <div class="field__value">{{medicalInformation.exerciseRestriction}}</div>
+              </div>
+            </div>
+            <div class="divider"></div>
+            <div class="field">
+              <div class="field__label">Injuries</div>
+              <ul class="chip-list">
+                {{#medicalInformation.injuries}}
+                <li class="chip {{#active}}chip--active{{/active}}">{{label}}</li>
+                {{/medicalInformation.injuries}}
+              </ul>
+              <div class="field__value">{{medicalInformation.otherInjuryDetails}}</div>
+            </div>
+            <div class="field-grid">
+              <div class="field">
+                <div class="field__label">Recent Injury</div>
+                <div class="field__value">{{medicalInformation.hadRecentInjury}}</div>
+              </div>
+              <div class="field">
+                <div class="field__label">Physician Cleared</div>
+                <div class="field__value">{{medicalInformation.physicianCleared}}</div>
+              </div>
+            </div>
+            <div class="field">
+              <div class="field__label">Clearance Notes</div>
+              <div class="field__value">{{medicalInformation.clearanceNotes}}</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="section__header">Legal Confirmation</div>
+          <div class="section__body legal-text">
+            <h3>{{legal.release.title}}</h3>
+            <p>{{legal.release.body}}</p>
+            <h3>{{legal.indemnification.title}}</h3>
+            <p>{{legal.indemnification.body}}</p>
+            <h3>{{legal.media.title}}</h3>
+            <p>{{legal.media.body}}</p>
+            <h3>{{legal.acknowledgement.title}}</h3>
+            <p>{{legal.acknowledgement.body}}</p>
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="section__header">Signatures &amp; Initials</div>
+          <div class="section__body signature-block">
+            <div class="signature">
+              <div class="signature__caption">Participant Signature</div>
+              <img src="{{signature.imageDataUrl}}" alt="Participant signature" />
+              <div class="field__value">Signed {{waiver.signedAt}}</div>
+            </div>
+            <div class="signature">
+              <div class="signature__caption">Initials</div>
+              <div class="field__value badge badge--primary">Risk: {{legalConfirmation.riskInitials}}</div>
+              <div class="field__value badge badge--primary">Release: {{legalConfirmation.releaseInitials}}</div>
+              <div class="field__value badge badge--primary">Indemnification: {{legalConfirmation.indemnificationInitials}}</div>
+              <div class="field__value badge badge--primary">Media: {{legalConfirmation.mediaInitials}}</div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer class="document__footer">
+        <span>Generated on {{document.generatedAt}} · Locale {{document.locale}}</span>
+        <span class="badge">Content Version {{document.version}}</span>
+      </footer>
+    </article>
+  </body>
+</html>
