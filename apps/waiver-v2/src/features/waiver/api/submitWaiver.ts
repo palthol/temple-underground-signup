@@ -1,5 +1,5 @@
 import type { Locale } from '../../../shared/i18n/I18nProvider'
-import type { WaiverFormInput } from '../hooks/useWaiverForm'
+import type { WaiverFormData, WaiverFormInput } from '../hooks/useWaiverForm'
 
 export type SubmitWaiverSuccess = {
   waiverId: string
@@ -66,7 +66,7 @@ const mapEmergencyContact = (input: WaiverFormInput['emergencyContact']) => ({
   email: normalizeOptional(input.email),
 })
 
-const mapMedicalInformation = (input: WaiverFormInput['medicalInformation']) => ({
+const mapMedicalInformation = (input: WaiverFormData['medicalInformation']) => ({
   heart_disease: input.heartDisease,
   shortness_of_breath: input.shortnessOfBreath,
   high_blood_pressure: input.highBloodPressure,
@@ -79,7 +79,7 @@ const mapMedicalInformation = (input: WaiverFormInput['medicalInformation']) => 
   last_physical: normalizeOptional(input.lastPhysical),
   exercise_restriction: normalizeOptional(input.exerciseRestriction),
   injuries: {
-    knees: input.injuries.knees,
+    knees: input.injuries.knees, 
     lower_back: input.injuries.lowerBack,
     neck_shoulders: input.injuries.neckShoulders,
     hip_pelvis: input.injuries.hipPelvis,
@@ -105,7 +105,7 @@ const mapLegalConfirmation = (input: WaiverFormInput['legalConfirmation']) => ({
 const buildPayload = (formData: WaiverFormInput, locale: Locale) => ({
   participant: mapParticipant(formData.personalInfo),
   emergency_contact: mapEmergencyContact(formData.emergencyContact),
-  medical_information: mapMedicalInformation(formData.medicalInformation),
+  medical_information: mapMedicalInformation(formData.medicalInformation as WaiverFormData['medicalInformation']),
   legal_confirmation: mapLegalConfirmation(formData.legalConfirmation),
   signature: formData.legalConfirmation.signature,
   review: { confirm_accuracy: formData.review.confirmAccuracy },
