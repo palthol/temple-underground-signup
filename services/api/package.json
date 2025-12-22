@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "node --watch src/index.js",
     "build": "echo 'API has no build step'",
-    "start": "node src/index.js"
+    "start": "node src/index.js",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.4",
@@ -15,6 +17,15 @@
     "express": "^4.19.2",
     "mustache": "^4.2.0",
     "node-fetch": "^3.3.2",
-    "pdf-lib": "^1.17.1"
+    "pdf-lib": "^1.17.1",
+    "playwright-core": "^1.57.0"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/supertest": "^6.0.3",
+    "@vitest/coverage-v8": "^4.0.16",
+    "@vitest/ui": "^4.0.16",
+    "supertest": "^7.1.4",
+    "vitest": "^4.0.16"
   }
 }
