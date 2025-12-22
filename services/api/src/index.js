@@ -4,6 +4,7 @@ import cors from 'cors';
 import { PDFDocument, StandardFonts } from 'pdf-lib';
 import crypto from 'node:crypto';
 import { createClient } from '@supabase/supabase-js';
+import { createWaiverPdfRouter } from './routes/waivers/pdf.js';
 
 const app = express();
 // CORS: allow configured origin or all in dev
@@ -398,6 +399,14 @@ app.get('/api/admin/waivers/:id', requireAdmin, async (req, res) => {
     return res.status(500).json({ ok: false, error: 'server_error' });
   }
 });
+
+app.use(
+  '/api/waivers',
+  createWaiverPdfRouter({
+    supabase,
+    requireAuth: requireAdmin,
+  }),
+);
 
 app.listen(PORT, () => {
   console.log(`API listening on :${PORT}`);

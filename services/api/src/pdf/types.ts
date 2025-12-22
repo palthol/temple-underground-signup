@@ -123,21 +123,21 @@ export interface WaiverPdfPayload {
     email: string | null;
   };
   medicalInformation: {
-    heartDisease: boolean | null;
-    shortnessOfBreath: boolean | null;
-    highBloodPressure: boolean | null;
-    smoking: boolean | null;
-    diabetes: boolean | null;
-    familyHistory: boolean | null;
-    workouts: boolean | null;
-    medication: boolean | null;
-    alcohol: boolean | null;
+    heartDisease: string | null;
+    shortnessOfBreath: string | null;
+    highBloodPressure: string | null;
+    smoking: string | null;
+    diabetes: string | null;
+    familyHistory: string | null;
+    workouts: string | null;
+    medication: string | null;
+    alcohol: string | null;
     lastPhysical: string | null;
     exerciseRestriction: string | null;
     injuries: Array<{ label: string; active: boolean }>;
     otherInjuryDetails: string | null;
-    hadRecentInjury: boolean | null;
-    physicianCleared: boolean | null;
+    hadRecentInjury: string | null;
+    physicianCleared: string | null;
     clearanceNotes: string | null;
   };
   legal: {

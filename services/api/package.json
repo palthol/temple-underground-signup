@@ -9,11 +9,12 @@
     "start": "node src/index.js"
   },
   "dependencies": {
-    "express": "^4.19.2",
+    "@supabase/supabase-js": "^2.45.4",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
-    "pdf-lib": "^1.17.1",
+    "express": "^4.19.2",
+    "mustache": "^4.2.0",
     "node-fetch": "^3.3.2",
-    "@supabase/supabase-js": "^2.45.4"
+    "pdf-lib": "^1.17.1"
   }
 }
