@@ -2,6 +2,7 @@ import { Router, type RequestHandler } from 'express'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { renderWaiverPdf } from '../../pdf/renderers/renderWaiverPdf.js'
 import { WaiverFetchFailedError, WaiverNotFoundError } from '../../pdf/data/fetchWaiver.js'
+import { generatePdfBuffer } from '../../pdf/renderers/generatePdfBuffer.js'
 
 type RequireAuth = RequestHandler | RequestHandler[]
 
@@ -40,12 +41,18 @@ export const createWaiverPdfRouter = ({ supabase, requireAuth }: CreateWaiverPdf
         waiverId,
       })
 
-      res.status(200).json({
-        ok: true,
-        waiverId,
-        payload,
-        html,
-      })
+      const pdfBuffer = await generatePdfBuffer({ html })
+
+      res
+        .status(200)
+        .set({
+          'Content-Type': 'application/pdf',
+          'Content-Disposition': `inline; filename="waiver-${waiverId}.pdf"`,
+          'Content-Length': String(pdfBuffer.length),
+          'X-Waiver-Locale': payload.document.locale,
+          'X-Waiver-Version': payload.document.version,
+        })
+        .send(pdfBuffer)
     } catch (error) {
       if (error instanceof WaiverNotFoundError) {
         res.status(404).json({ ok: false, error: 'waiver_not_found' })

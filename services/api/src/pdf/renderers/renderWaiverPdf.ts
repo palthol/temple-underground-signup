@@ -1,6 +1,6 @@
 import { Buffer } from 'node:buffer'
 import { readFile } from 'node:fs/promises'
-import Mustache from 'mustache'
+import * as Mustache from 'mustache'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { fetchWaiverById } from '../data/fetchWaiver.js'
 import { mapWaiverToPayload } from '../data/mapWaiverToPayload.js'
@@ -81,16 +81,15 @@ export interface RenderWaiverPdfOptions {
   legalCopyProvider?: (locale: string) => LegalCopy | null
 }
 
+/**
+ * Fetches waiver data, maps it into the template payload, hydrates the HTML template,
+ * and returns the rendered HTML and PDF buffer.
+ */
 export interface RenderWaiverPdfResult {
   payload: WaiverPdfPayload
   html: string
 }
 
-/**
- * Fetches waiver data, maps it into the template payload, hydrates the HTML template,
- * and returns the rendered markup. Converting the HTML into a PDF binary is handled
- * by a downstream step (e.g. Playwright/Puppeteer) which can consume the `html` output.
- */
 export const renderWaiverPdf = async ({
   supabase,
   waiverId,
@@ -101,6 +100,14 @@ export const renderWaiverPdf = async ({
   const joined = await fetchWaiverById(supabase, waiverId)
   const locale = joined.audit?.locale || DEFAULT_LOCALE
   const template = await loadTemplate()
+  const mustacheModule = Mustache as unknown as {
+    render?: (template: string, view: unknown) => string
+    default?: { render?: (template: string, view: unknown) => string }
+  }
+  const renderFn = mustacheModule.render ?? mustacheModule.default?.render
+  if (typeof renderFn !== 'function') {
+    throw new TypeError('mustache_renderer_unavailable')
+  }
   const signatureDataUrl = await toDataUrl(supabase, joined.waiver.signature_image_url || null)
 
   const payload = mapWaiverToPayload(joined, {
@@ -115,7 +122,7 @@ export const renderWaiverPdf = async ({
 
   payload.signature.imageDataUrl = signatureDataUrl
 
-  const html = Mustache.render(template, payload)
+  const html = renderFn(template, payload)
 
   return { payload, html }
 }
