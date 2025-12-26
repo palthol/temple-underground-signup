@@ -1,20 +1,12 @@
-import { Router, type RequestHandler } from 'express'
-import type { SupabaseClient } from '@supabase/supabase-js'
+import { Router } from 'express'
 import { renderWaiverPdf } from '../../pdf/renderers/renderWaiverPdf.js'
-import { WaiverFetchFailedError, WaiverNotFoundError } from '../../pdf/data/fetchWaiver.js'
 import { generatePdfBuffer } from '../../pdf/renderers/generatePdfBuffer.js'
+import { WaiverFetchFailedError, WaiverNotFoundError } from '../../pdf/data/fetchWaiver.js'
 
-type RequireAuth = RequestHandler | RequestHandler[]
-
-type CreateWaiverPdfRouterOptions = {
-  supabase: SupabaseClient | null
-  requireAuth?: RequireAuth
-}
-
-export const createWaiverPdfRouter = ({ supabase, requireAuth }: CreateWaiverPdfRouterOptions) => {
+export const createWaiverPdfRouter = ({ supabase, requireAuth }) => {
   const router = Router()
 
-  const handlers: RequestHandler[] = []
+  const handlers = []
   if (requireAuth) {
     if (Array.isArray(requireAuth)) {
       handlers.push(...requireAuth)
@@ -71,4 +63,3 @@ export const createWaiverPdfRouter = ({ supabase, requireAuth }: CreateWaiverPdf
 
   return router
 }
-

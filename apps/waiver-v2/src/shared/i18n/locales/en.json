@@ -49,7 +49,9 @@
       "sha256": "Document SHA-256"
     },
     "actions": {
-      "new": "Submit another waiver"
+      "new": "Submit another waiver",
+      "downloadPdf": "Download waiver PDF",
+      "downloading": "Preparing PDF…"
     }
   },
   "personalInfo": {

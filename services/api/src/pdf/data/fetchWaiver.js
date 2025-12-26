@@ -1,44 +1,30 @@
-import type { SupabaseClient } from '@supabase/supabase-js'
-import type {
-  AuditTrailRecord,
-  EmergencyContactRecord,
-  ParticipantRecord,
-  WaiverJoinedRow,
-  WaiverMedicalHistoryRecord,
-  WaiverRecord,
-} from '../types.js'
-
-const VIEW_NAME = 'view_waiver_documents'
-
 export class WaiverNotFoundError extends Error {
-  constructor(waiverId: string) {
+  constructor(waiverId) {
     super(`Waiver ${waiverId} not found`)
     this.name = 'WaiverNotFoundError'
   }
 }
 
 export class WaiverFetchFailedError extends Error {
-  constructor(message: string) {
+  constructor(message) {
     super(message)
     this.name = 'WaiverFetchFailedError'
   }
 }
 
-type ViewRow = Record<string, unknown>
+const toStringOrNull = (value) => (typeof value === 'string' ? value : null)
 
-const toStringOrNull = (value: unknown): string | null => (typeof value === 'string' ? value : null)
-
-const toBooleanOrNull = (value: unknown): boolean | null => {
+const toBooleanOrNull = (value) => {
   if (typeof value === 'boolean') return value
   if (value === null || value === undefined) return null
   return Boolean(value)
 }
 
-const toRecordOrNull = (value: unknown): Record<string, unknown> | null =>
-  typeof value === 'object' && value !== null && !Array.isArray(value) ? (value as Record<string, unknown>) : null
+const toRecordOrNull = (value) =>
+  value && typeof value === 'object' && !Array.isArray(value) ? value : null
 
-const toJoinedRow = (row: ViewRow): WaiverJoinedRow => {
-  const waiver: WaiverRecord = {
+const toJoinedRow = (row) => {
+  const waiver = {
     id: String(row.waiver_id),
     participant_id: String(row.participant_id),
     consent_acknowledged: toBooleanOrNull(row.consent_acknowledged),
@@ -52,21 +38,23 @@ const toJoinedRow = (row: ViewRow): WaiverJoinedRow => {
     review_confirm_accuracy: toBooleanOrNull(row.review_confirm_accuracy),
   }
 
-  const participant: ParticipantRecord | null = {
-    id: String(row.participant_id),
-    full_name: toStringOrNull(row.participant_full_name),
-    date_of_birth: toStringOrNull(row.participant_date_of_birth),
-    address_line: toStringOrNull(row.participant_address_line),
-    city: toStringOrNull(row.participant_city),
-    state: toStringOrNull(row.participant_state),
-    zip: toStringOrNull(row.participant_zip),
-    home_phone: toStringOrNull(row.participant_home_phone),
-    cell_phone: toStringOrNull(row.participant_cell_phone),
-    email: toStringOrNull(row.participant_email),
-    created_at: null,
-  }
+  const participant = row.participant_id
+    ? {
+        id: String(row.participant_id),
+        full_name: toStringOrNull(row.participant_full_name),
+        date_of_birth: toStringOrNull(row.participant_date_of_birth),
+        address_line: toStringOrNull(row.participant_address_line),
+        city: toStringOrNull(row.participant_city),
+        state: toStringOrNull(row.participant_state),
+        zip: toStringOrNull(row.participant_zip),
+        home_phone: toStringOrNull(row.participant_home_phone),
+        cell_phone: toStringOrNull(row.participant_cell_phone),
+        email: toStringOrNull(row.participant_email),
+        created_at: toStringOrNull(row.participant_created_at),
+      }
+    : null
 
-  const medical: WaiverMedicalHistoryRecord | null = row.medical_history_id
+  const medical = row.medical_history_id
     ? {
         id: String(row.medical_history_id),
         waiver_id: waiver.id,
@@ -96,7 +84,7 @@ const toJoinedRow = (row: ViewRow): WaiverJoinedRow => {
       }
     : null
 
-  const emergencyContact: EmergencyContactRecord | null = row.emergency_contact_id
+  const emergencyContact = row.emergency_contact_id
     ? {
         id: String(row.emergency_contact_id),
         waiver_id: waiver.id,
@@ -109,7 +97,7 @@ const toJoinedRow = (row: ViewRow): WaiverJoinedRow => {
       }
     : null
 
-  const audit: AuditTrailRecord | null = row.audit_id
+  const audit = row.audit_id
     ? {
         id: String(row.audit_id),
         participant_id: waiver.participant_id,
@@ -132,21 +120,13 @@ const toJoinedRow = (row: ViewRow): WaiverJoinedRow => {
   }
 }
 
-/**
- * Fetches a waiver document row from Supabase view `view_waiver_documents`.
- * The view returns a flattened column set (prefixed like `participant_*`),
- * which is normalized here into the structured `WaiverJoinedRow`.
- */
-export const fetchWaiverById = async (
-  supabase: SupabaseClient,
-  waiverId: string,
-): Promise<WaiverJoinedRow> => {
+export const fetchWaiverById = async (supabase, waiverId) => {
   const { data, error } = await supabase
-    .from(VIEW_NAME)
+    .from('view_waiver_documents')
     .select('*')
     .eq('waiver_id', waiverId)
     .limit(1)
-    .maybeSingle<ViewRow>()
+    .maybeSingle()
 
   if (error) {
     throw new WaiverFetchFailedError(error.message)
@@ -158,4 +138,5 @@ export const fetchWaiverById = async (
 
   return toJoinedRow(data)
 }
+
 

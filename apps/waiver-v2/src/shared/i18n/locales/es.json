@@ -49,7 +49,9 @@
       "sha256": "SHA-256 del documento"
     },
     "actions": {
-      "new": "Enviar otra exención"
+      "new": "Enviar otra exención",
+      "downloadPdf": "Descargar PDF de la exención",
+      "downloading": "Preparando PDF…"
     }
   },
   "personalInfo": {

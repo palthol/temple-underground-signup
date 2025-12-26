@@ -9,6 +9,8 @@ import { PersonalInfoStep, MedicalInfoStep, LegalConfirmationStep, ReviewStep } 
 import { getStepSchema } from '../../features/waiver/schema/waiver'
 import { z } from 'zod'
 import { submitWaiver, type SubmitWaiverFieldError, type SubmitWaiverSuccess } from '../../features/waiver/api/submitWaiver'
+import { getWaiverPdf } from '../../features/waiver/api/getWaiverPdf'
+import { fillSampleWaiver } from '../../features/waiver/utils/sampleWaiver'
 
 const stepTitles = [
   'Personal & Emergency Information',
@@ -32,6 +34,8 @@ export const WaiverPage: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = React.useState(false)
   const [submitError, setSubmitError] = React.useState<string | null>(null)
   const [submitSuccess, setSubmitSuccess] = React.useState<SubmitWaiverSuccess | null>(null)
+  const [isDownloading, setIsDownloading] = React.useState(false)
+  const [downloadError, setDownloadError] = React.useState<string | null>(null)
   const currentStepId = stepIds[index]
   const currentSchema = React.useMemo(() => getStepSchema(t, currentStepId), [t, currentStepId])
   const currentStepData = methods.watch(currentStepId as any)
@@ -99,7 +103,48 @@ export const WaiverPage: React.FC = () => {
     resetSteps()
     setSubmitSuccess(null)
     setSubmitError(null)
+    setDownloadError(null)
   }, [methods, resetSteps])
+
+  const handleFillSample = React.useCallback(() => {
+    fillSampleWaiver(methods)
+    resetSteps()
+    setSubmitError(null)
+    setDownloadError(null)
+  }, [methods, resetSteps])
+
+  const handleDownloadPdf = React.useCallback(async () => {
+    if (!submitSuccess) return
+    setIsDownloading(true)
+    setDownloadError(null)
+    try {
+      const result = await getWaiverPdf(submitSuccess.waiverId)
+      if (!result.ok) {
+        const translated = result.error ? translateMessageKey(`submission.error.${result.error}`) : undefined
+        setDownloadError(translated ?? result.error ?? t('submission.error.generic'))
+        return
+      }
+
+      const blobUrl = URL.createObjectURL(result.blob)
+      const link = document.createElement('a')
+      link.href = blobUrl
+      link.download = result.fileName
+      link.rel = 'noopener'
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+      URL.revokeObjectURL(blobUrl)
+    } catch (error) {
+      if (error instanceof Error) {
+        const translated = translateMessageKey(error.message)
+        setDownloadError(translated ?? error.message)
+      } else {
+        setDownloadError(t('submission.error.generic'))
+      }
+    } finally {
+      setIsDownloading(false)
+    }
+  }, [submitSuccess, t, translateMessageKey])
 
   const onBack = () => {
     if (submitSuccess) return
@@ -212,13 +257,31 @@ export const WaiverPage: React.FC = () => {
                 </div>
               )}
             </dl>
-            <button
-              type="button"
-              onClick={handleStartOver}
-              className="inline-flex items-center justify-center rounded-md bg-black px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-slate-900"
-            >
-              {t('submission.actions.new')}
-            </button>
+            {downloadError && (
+              <div
+                role="alert"
+                className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
+              >
+                {downloadError}
+              </div>
+            )}
+            <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
+              <button
+                type="button"
+                onClick={handleDownloadPdf}
+                disabled={isDownloading}
+                className="inline-flex items-center justify-center rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-70"
+              >
+                {isDownloading ? t('submission.actions.downloading') : t('submission.actions.downloadPdf')}
+              </button>
+              <button
+                type="button"
+                onClick={handleStartOver}
+                className="inline-flex items-center justify-center rounded-md bg-black px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-slate-900"
+              >
+                {t('submission.actions.new')}
+              </button>
+            </div>
           </div>
         ) : (
           <div className="space-y-4">
@@ -231,6 +294,17 @@ export const WaiverPage: React.FC = () => {
               </div>
             )}
             {renderStep()}
+            {import.meta.env.DEV && (
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  onClick={handleFillSample}
+                  className="inline-flex items-center justify-center rounded-md border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-100"
+                >
+                  Fill with sample data
+                </button>
+              </div>
+            )}
             <StepNavigation
               isFirstStep={isFirst}
               isLastStep={isLast}

@@ -1,7 +1,6 @@
 import express from 'express'
 import request from 'supertest'
 import { describe, expect, it, vi, beforeEach } from 'vitest'
-import type { SupabaseClient } from '@supabase/supabase-js'
 
 vi.mock('../../pdf/renderers/renderWaiverPdf.js', () => ({
   renderWaiverPdf: vi.fn(),
@@ -15,7 +14,7 @@ import { renderWaiverPdf } from '../../pdf/renderers/renderWaiverPdf.js'
 import { generatePdfBuffer } from '../../pdf/renderers/generatePdfBuffer.js'
 import { createWaiverPdfRouter } from './pdf.js'
 
-const supabaseStub = {} as SupabaseClient
+const supabaseStub = {}
 
 beforeEach(() => {
   vi.resetAllMocks()

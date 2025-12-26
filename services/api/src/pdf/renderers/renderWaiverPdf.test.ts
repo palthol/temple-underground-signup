@@ -1,5 +1,4 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest'
-import type { SupabaseClient } from '@supabase/supabase-js'
 import { renderWaiverPdf } from './renderWaiverPdf.js'
 
 vi.mock('../data/fetchWaiver.js', () => ({
@@ -80,7 +79,7 @@ const supabaseStub = {
       download: downloadMock,
     }),
   },
-} as unknown as SupabaseClient
+}
 
 beforeEach(() => {
   const pngBuffer = Buffer.from('fake-png')
@@ -102,8 +101,10 @@ describe('renderWaiverPdf', () => {
     expect(result.payload.participant.fullName).toBe('Moises Varillas')
     expect(result.payload.document.version).toBe('waiver.v1')
     expect(result.payload.signature.imageDataUrl).toMatch(/^data:image\/png;base64,/)
+    expect(result.payload.legal.release.title).toBe('Release')
     expect(result.html).toContain('Moises Varillas')
     expect(result.html).toContain('Temple Underground')
+    expect(result.html).toContain('In full consideration of the above mentioned risks and hazards')
   })
 })
 
