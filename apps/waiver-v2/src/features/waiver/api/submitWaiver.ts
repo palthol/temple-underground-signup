@@ -1,5 +1,6 @@
 import type { Locale } from '../../../shared/i18n/I18nProvider'
 import type { WaiverFormData, WaiverFormInput } from '../hooks/useWaiverForm'
+import { buildApiUrl } from './client'
 
 export type SubmitWaiverSuccess = {
   waiverId: string
@@ -33,12 +34,6 @@ const parseFieldErrors = (value: unknown): SubmitWaiverFieldError[] | undefined 
   }, [])
 
   return parsed.length ? parsed : undefined
-}
-
-const getApiBaseUrl = () => {
-  const fromEnv = import.meta.env.VITE_API_BASE_URL as string | undefined
-  if (!fromEnv) return ''
-  return fromEnv.endsWith('/') ? fromEnv.slice(0, -1) : fromEnv
 }
 
 const normalizeOptional = (value: string | undefined | null) => {
@@ -177,8 +172,7 @@ export const submitWaiver = async (
   formData: WaiverFormInput,
   locale: Locale,
 ): Promise<SubmitWaiverResult> => {
-  const baseUrl = getApiBaseUrl()
-  const url = `${baseUrl}/api/waivers/submit`
+  const url = buildApiUrl('/api/waivers/submit')
   const payload = buildPayload(formData, locale)
 
   console.log('[waiver] submitting payload summary', summarizePayloadForLog(payload))
