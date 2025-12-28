@@ -2,6 +2,7 @@ import React from 'react'
 import { FormProvider, type FieldPath } from 'react-hook-form'
 import { useI18n } from '../../shared/i18n/I18nProvider'
 import { WaiverWizardLayout } from '../../features/waiver/components/Wizard/WaiverWizardLayout'
+import type { ServiceStatus } from '../../features/waiver/components/Wizard/WaiverWizardLayout'
 import { StepNavigation } from '../../features/waiver/components/Wizard/StepNavigation'
 import { useWaiverForm, type WaiverFormInput } from '../../features/waiver/hooks/useWaiverForm'
 import { useWaiverSteps } from '../../features/waiver/hooks/useWaiverSteps'
@@ -11,6 +12,7 @@ import { z } from 'zod'
 import { submitWaiver, type SubmitWaiverFieldError, type SubmitWaiverSuccess } from '../../features/waiver/api/submitWaiver'
 import { getWaiverPdf } from '../../features/waiver/api/getWaiverPdf'
 import { fillSampleWaiver } from '../../features/waiver/utils/sampleWaiver'
+import { SectionCard } from '../../features/waiver/components/common/SectionCard'
 
 const stepTitles = [
   'Personal & Emergency Information',
@@ -43,7 +45,7 @@ export const WaiverPage: React.FC = () => {
   const canAdvance = validationResult.success && !isSubmitting && !submitSuccess
 
   const serverFieldMap = React.useMemo(() => {
-    const mapping: Partial<Record<string, FieldPath<WaiverFormInput>>> = {
+    const map = {
       'participant.full_name': 'personalInfo.fullName',
       'participant.date_of_birth': 'personalInfo.dateOfBirth',
       'participant.address_line': 'personalInfo.addressLine1',
@@ -70,8 +72,9 @@ export const WaiverPage: React.FC = () => {
       'legal_confirmation.accepted_terms': 'legalConfirmation.acceptedTerms',
       signature: 'legalConfirmation.signature.pngDataUrl',
       'review.confirm_accuracy': 'review.confirmAccuracy',
-    }
-    return mapping
+    } as unknown as Record<string, FieldPath<WaiverFormInput>>
+
+    return map
   }, [])
 
   const translateMessageKey = React.useCallback(
@@ -107,7 +110,7 @@ export const WaiverPage: React.FC = () => {
   }, [methods, resetSteps])
 
   const handleFillSample = React.useCallback(() => {
-    fillSampleWaiver(methods)
+    fillSampleWaiver(methods as unknown as Parameters<typeof fillSampleWaiver>[0])
     resetSteps()
     setSubmitError(null)
     setDownloadError(null)
@@ -166,7 +169,7 @@ export const WaiverPage: React.FC = () => {
       try {
         await methods.handleSubmit(async (formValues) => {
           setSubmitError(null)
-          const result = await submitWaiver(formValues, locale)
+          const result = await submitWaiver(formValues as unknown as WaiverFormInput, locale)
           if (result.ok) {
             setSubmitSuccess(result.data)
             methods.reset(formValues)
@@ -217,7 +220,12 @@ export const WaiverPage: React.FC = () => {
 
   const stepTitle = submitSuccess ? t('submission.success.title') : stepTitles[index]
   const stepIndicator = submitSuccess ? undefined : `Step ${index + 1} of ${total}`
-  const apiStatus = submitError ? 'fail' : submitSuccess ? 'ok' : 'unknown'
+
+  const apiStatus = React.useMemo<ServiceStatus>(() => {
+    if (submitError) return 'fail'
+    if (submitSuccess) return 'ok'
+    return 'unknown'
+  }, [submitError, submitSuccess])
 
   return (
     <FormProvider {...methods}>
@@ -228,67 +236,69 @@ export const WaiverPage: React.FC = () => {
         statuses={{ apiStatus, dbStatus: 'ok' }}
       >
         {submitSuccess ? (
-          <div className="space-y-6 text-center">
-            <div className="space-y-2">
-              <h2 className="text-xl font-semibold text-emerald-700">
-                {t('submission.success.title')}
-              </h2>
-              <p className="text-sm text-slate-600">{t('submission.success.body')}</p>
-            </div>
-            <dl className="space-y-3 rounded-lg border border-emerald-100 bg-emerald-50 p-4 text-left">
-              <div className="flex flex-col gap-1">
-                <dt className="text-xs font-medium uppercase tracking-wide text-emerald-700">
-                  {t('submission.details.waiverId')}
-                </dt>
-                <dd className="break-all font-mono text-xs text-slate-700">{submitSuccess.waiverId}</dd>
+          <div className="space-y-6">
+            <SectionCard
+              title={t('submission.success.title')}
+              subtitle={t('submission.success.body')}
+              alignHeader="center"
+            >
+              <div className="grid gap-4 md:grid-cols-3">
+                <div className="rounded-xl border border-brand-outline/30 bg-brand-surface-variant/60 p-4 text-center">
+                  <p className="text-xs font-semibold uppercase tracking-[0.25em] text-brand-secondary">
+                    {t('submission.details.waiverId')}
+                  </p>
+                  <p className="mt-2 break-all font-mono text-sm text-brand-primary">{submitSuccess.waiverId}</p>
+                </div>
+                <div className="rounded-xl border border-brand-outline/30 bg-brand-surface-variant/60 p-4 text-center">
+                  <p className="text-xs font-semibold uppercase tracking-[0.25em] text-brand-secondary">
+                    {t('submission.details.participantId')}
+                  </p>
+                  <p className="mt-2 break-all font-mono text-sm text-brand-primary">{submitSuccess.participantId}</p>
+                </div>
+                {submitSuccess.sha256 && (
+                  <div className="rounded-xl border border-brand-outline/30 bg-brand-surface-variant/60 p-4 text-center">
+                    <p className="text-xs font-semibold uppercase tracking-[0.25em] text-brand-secondary">
+                      {t('submission.details.sha256')}
+                    </p>
+                    <p className="mt-2 break-all font-mono text-xs text-brand-primary">{submitSuccess.sha256}</p>
+                  </div>
+                )}
               </div>
-              <div className="flex flex-col gap-1">
-                <dt className="text-xs font-medium uppercase tracking-wide text-emerald-700">
-                  {t('submission.details.participantId')}
-                </dt>
-                <dd className="break-all font-mono text-xs text-slate-700">{submitSuccess.participantId}</dd>
-              </div>
-              {submitSuccess.sha256 && (
-                <div className="flex flex-col gap-1">
-                  <dt className="text-xs font-medium uppercase tracking-wide text-emerald-700">
-                    {t('submission.details.sha256')}
-                  </dt>
-                  <dd className="break-all font-mono text-xs text-slate-700">{submitSuccess.sha256}</dd>
+
+              {downloadError && (
+                <div
+                  role="alert"
+                  className="mt-6 rounded-xl border border-brand-error/40 bg-brand-error/10 px-4 py-3 text-sm font-medium text-brand-error"
+                >
+                  {downloadError}
                 </div>
               )}
-            </dl>
-            {downloadError && (
-              <div
-                role="alert"
-                className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
-              >
-                {downloadError}
+
+              <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+                <button
+                  type="button"
+                  onClick={handleDownloadPdf}
+                  disabled={isDownloading}
+                  className="inline-flex items-center justify-center rounded-full bg-brand-primary px-6 py-3 text-sm font-semibold uppercase tracking-[0.2em] text-white shadow-lg shadow-brand-primary/30 transition hover:bg-brand-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {isDownloading ? t('submission.actions.downloading') : t('submission.actions.downloadPdf')}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleStartOver}
+                  className="inline-flex items-center justify-center rounded-full border border-brand-outline/50 bg-brand-surface px-6 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-brand-secondary transition hover:border-brand-primary hover:text-brand-primary"
+                >
+                  {t('submission.actions.new')}
+                </button>
               </div>
-            )}
-            <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
-              <button
-                type="button"
-                onClick={handleDownloadPdf}
-                disabled={isDownloading}
-                className="inline-flex items-center justify-center rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-70"
-              >
-                {isDownloading ? t('submission.actions.downloading') : t('submission.actions.downloadPdf')}
-              </button>
-              <button
-                type="button"
-                onClick={handleStartOver}
-                className="inline-flex items-center justify-center rounded-md bg-black px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-slate-900"
-              >
-                {t('submission.actions.new')}
-              </button>
-            </div>
+            </SectionCard>
           </div>
         ) : (
           <div className="space-y-4">
             {submitError && (
               <div
                 role="alert"
-                className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700"
+                className="rounded-xl border border-brand-error/40 bg-brand-error/10 p-4 text-sm font-medium text-brand-error shadow-sm"
               >
                 {submitError}
               </div>
@@ -299,7 +309,7 @@ export const WaiverPage: React.FC = () => {
                 <button
                   type="button"
                   onClick={handleFillSample}
-                  className="inline-flex items-center justify-center rounded-md border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-100"
+                  className="inline-flex items-center justify-center rounded-full border border-brand-outline/50 bg-brand-surface px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-brand-secondary transition hover:border-brand-primary hover:text-brand-primary"
                 >
                   Fill with sample data
                 </button>

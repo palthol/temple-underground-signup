@@ -3,11 +3,17 @@ import { useForm, type UseFormReturn } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { createWaiverSchema, stepFieldPaths } from '../schema/waiver'
 import { z } from 'zod'
+import type { MedicalInformationInput } from '../schema/MedicalInformation'
 
 type Translate = (key: string) => string
 
 type WaiverSchema = ReturnType<typeof createWaiverSchema>
-export type WaiverFormInput = z.input<WaiverSchema>
+type WaiverFormInputBase = z.input<WaiverSchema>
+
+// Override medicalInformation with the explicit type to fix TypeScript inference issues
+export type WaiverFormInput = Omit<WaiverFormInputBase, 'medicalInformation'> & {
+  medicalInformation: MedicalInformationInput
+}
 export type WaiverFormData = z.output<WaiverSchema>
 
 declare global {

@@ -3,6 +3,8 @@ import { useFormContext } from 'react-hook-form'
 import type { WaiverFormInput } from '../../hooks/useWaiverForm'
 import { SignatureField, type SignatureValue } from '../SignatureField'
 import { useI18n } from '../../../../shared/i18n/I18nProvider'
+import { SectionCard } from '../common/SectionCard'
+import { Field, checkboxClasses, inputBaseClasses } from '../common/Field'
 
 const clauseKeys: { key: keyof WaiverFormInput['legalConfirmation']; titleKey: string; bodyKey: string }[] = [
   { key: 'riskInitials', titleKey: 'legalClauses.assumption.title', bodyKey: 'legalClauses.assumption.body' },
@@ -29,58 +31,63 @@ export const LegalConfirmationStep: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <header className="space-y-2">
-        <h2 className="text-base font-semibold text-slate-800">{t('legalConfirmation.title')}</h2>
-        <p className="text-sm text-slate-600">{t('legalConfirmation.description')}</p>
-      </header>
+      <SectionCard
+        title={t('legalConfirmation.title')}
+        subtitle={t('legalConfirmation.description')}
+      >
+        <div className="space-y-6">
+          {clauseKeys.map(({ key, titleKey, bodyKey }) => (
+            <div key={key} className="space-y-2 rounded-xl border border-brand-outline/40 bg-brand-surface-variant/40 p-5">
+              <h3 className="text-sm font-semibold text-brand-on-surface">{t(titleKey)}</h3>
+              <p className="text-sm leading-relaxed text-brand-secondary/85">{t(bodyKey)}</p>
+              <Field
+                label={t(`legalConfirmation.fields.${key}`)}
+                error={legalError(key) || undefined}
+                className="max-w-[120px]"
+              >
+                <input
+                  type="text"
+                  maxLength={2}
+                  className={`${inputBaseClasses} text-center uppercase tracking-[0.25em]`}
+                  {...register(`legalConfirmation.${key}`)}
+                />
+              </Field>
+            </div>
+          ))}
 
-      <section className="space-y-6">
-        {clauseKeys.map(({ key, titleKey, bodyKey }) => (
-          <article key={key} className="space-y-2 rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-            <h3 className="text-sm font-semibold text-slate-700">{t(titleKey)}</h3>
-            <p className="text-sm leading-relaxed text-slate-600">{t(bodyKey)}</p>
-            <label className="block text-sm font-medium text-slate-700">
-              {t(`legalConfirmation.fields.${key}`)}
-              <input
-                type="text"
-                maxLength={2}
-                className="mt-1 w-24 rounded border border-slate-300 p-2 text-center uppercase"
-                {...register(`legalConfirmation.${key}`)}
-              />
+          <div className="rounded-xl border border-brand-outline/40 bg-brand-surface-variant/60 p-5">
+            <h3 className="text-sm font-semibold text-brand-on-surface">{t('legalClauses.acknowledgement.title')}</h3>
+            <p className="mt-2 text-sm leading-relaxed text-brand-secondary/85">{t('legalClauses.acknowledgement.body')}</p>
+            <label className="mt-4 flex items-start gap-3 text-sm font-medium text-brand-on-surface">
+              <input type="checkbox" className={checkboxClasses} {...register('legalConfirmation.acceptedTerms')} />
+              <span>{t('legalConfirmation.fields.acceptedTerms')}</span>
             </label>
-            {legalError(key) && <p className="text-xs text-red-600">{legalError(key)}</p>}
-          </article>
-        ))}
+            {legalError('acceptedTerms') && (
+              <p className="mt-2 text-xs font-medium text-brand-error">{legalError('acceptedTerms')}</p>
+            )}
+          </div>
+        </div>
+      </SectionCard>
 
-        <article className="space-y-2 rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-          <h3 className="text-sm font-semibold text-slate-700">{t('legalClauses.acknowledgement.title')}</h3>
-          <p className="text-sm leading-relaxed text-slate-600">{t('legalClauses.acknowledgement.body')}</p>
-          <label className="flex items-start gap-2 text-sm text-slate-700">
-            <input type="checkbox" {...register('legalConfirmation.acceptedTerms')} />
-            <span>{t('legalConfirmation.fields.acceptedTerms')}</span>
-          </label>
-          {legalError('acceptedTerms') && (
-            <p className="text-xs text-red-600">{legalError('acceptedTerms')}</p>
+      <SectionCard
+        title={t('legalConfirmation.fields.signature.label')}
+        subtitle={t('legalConfirmation.fields.signature.instructions')}
+      >
+        <div className="space-y-3">
+          <SignatureField
+            value={signatureValue ?? EMPTY_SIGNATURE}
+            onChange={(next) =>
+              setValue('legalConfirmation.signature', next, {
+                shouldDirty: true,
+                shouldValidate: true,
+              })
+            }
+          />
+          {legalError('signature') && (
+            <p className="text-xs font-medium text-brand-error">{legalError('signature')}</p>
           )}
-        </article>
-      </section>
-
-      <section className="space-y-4">
-        <h3 className="text-sm font-semibold text-slate-700">{t('legalConfirmation.fields.signature.label')}</h3>
-        <p className="text-xs text-slate-500">{t('legalConfirmation.fields.signature.instructions')}</p>
-        <SignatureField
-          value={signatureValue ?? EMPTY_SIGNATURE}
-          onChange={(next) =>
-            setValue('legalConfirmation.signature', next, {
-              shouldDirty: true,
-              shouldValidate: true,
-            })
-          }
-        />
-        {legalError('signature') && (
-          <p className="text-xs text-red-600">{legalError('signature')}</p>
-        )}
-      </section>
+        </div>
+      </SectionCard>
     </div>
   )
 }

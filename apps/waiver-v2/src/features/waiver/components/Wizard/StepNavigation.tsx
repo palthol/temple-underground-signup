@@ -26,28 +26,29 @@ export const StepNavigation: React.FC<Props> = ({
   labels,
 }) => {
   const { t } = useI18n()
+  const nextLabel = isLastStep ? labels.submit : labels.nextAlt ?? labels.next
+
   return (
-    <div className="mt-4 flex items-center justify-between gap-2">
+    <div className="mt-8 flex flex-col-reverse gap-3 md:flex-row md:items-center md:justify-between">
       <button
         type="button"
-        className="rounded-md border px-4 py-2 text-sm disabled:opacity-50"
         onClick={onBack}
         disabled={isFirstStep || !!isSubmitting}
+        className="inline-flex items-center justify-center rounded-full border border-brand-outline/60 bg-brand-surface px-5 py-2 text-sm font-semibold uppercase tracking-[0.15em] text-brand-secondary transition hover:border-brand-primary hover:text-brand-primary disabled:cursor-not-allowed disabled:opacity-40"
       >
         {t('nav.back')}
       </button>
+
       <button
         type="button"
-        className="rounded-md bg-black px-4 py-2 text-sm text-white disabled:opacity-50"
         onClick={onNext}
         disabled={!!disabledNext || !!isSubmitting}
+        className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-slate-700 via-slate-800 to-blue-900 px-6 py-3 text-sm font-semibold uppercase tracking-[0.2em] text-white shadow-lg shadow-slate-900/30 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
       >
-        {isLastStep ? labels.submit : labels.nextAlt ?? labels.next}
+        {nextLabel}
       </button>
     </div>
   )
 }
 
 export default StepNavigation
-
-

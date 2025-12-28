@@ -2,30 +2,73 @@ import { z } from 'zod'
 import type { Translate } from './common'
 import { yesNoSchema } from './common'
 
-export const createMedicalInformationSchema = (t: Translate) => {
-  const baseSchema = z
+// Define the base schema structure for type inference
+const baseMedicalInformationSchema = z.object({
+  heartDisease: z.boolean(),
+  shortnessOfBreath: z.boolean(),
+  highBloodPressure: z.boolean(),
+  smoking: z.boolean(),
+  diabetes: z.boolean(),
+  familyHistory: z.boolean(),
+  workouts: z.boolean(),
+  medication: z.boolean(),
+  alcohol: z.boolean(),
+  lastPhysical: z
+    .string()
+    .trim()
+    .optional()
+    .transform((value) => value || undefined)
+    .default(''),
+  exerciseRestriction: z
+    .string()
+    .trim()
+    .optional()
+    .transform((value) => value || undefined)
+    .default(''),
+  injuries: z
     .object({
-      heartDisease: z.boolean(),
-      shortnessOfBreath: z.boolean(),
-      highBloodPressure: z.boolean(),
-      smoking: z.boolean(),
-      diabetes: z.boolean(),
-      familyHistory: z.boolean(),
-      workouts: z.boolean(),
-      medication: z.boolean(),
-      alcohol: z.boolean(),
-      lastPhysical: z
-        .string()
-        .trim()
-        .optional()
-        .transform((value) => value || undefined)
-        .default(''),
-      exerciseRestriction: z
-        .string()
-        .trim()
-        .optional()
-        .transform((value) => value || undefined)
-        .default(''),
+      knees: z.boolean(),
+      lowerBack: z.boolean(),
+      neckShoulders: z.boolean(),
+      hipPelvis: z.boolean(),
+      other: z.object({
+        has: z.boolean(),
+        details: z
+          .string()
+          .trim()
+          .optional()
+          .transform((value) => value || undefined)
+          .default(''),
+      }),
+    })
+    .strict(),
+  hadRecentInjury: yesNoSchema,
+  injuryDetails: z
+    .string()
+    .trim()
+    .optional()
+    .transform((value) => value || undefined)
+    .default(''),
+  physicianCleared: z
+    .string()
+    .trim()
+    .transform((value) => (value.length ? value : undefined))
+    .optional()
+    .pipe(yesNoSchema.optional()),
+  clearanceNotes: z
+    .string()
+    .trim()
+    .optional()
+    .transform((value) => value || undefined)
+    .default(''),
+})
+
+// Export the input type for proper TypeScript inference
+export type MedicalInformationInput = z.input<typeof baseMedicalInformationSchema>
+
+export const createMedicalInformationSchema = (t: Translate) => {
+  const baseSchema = baseMedicalInformationSchema
+    .extend({
       injuries: z
         .object({
           knees: z.boolean(),
@@ -53,25 +96,6 @@ export const createMedicalInformationSchema = (t: Translate) => {
             }),
         })
         .strict(),
-      hadRecentInjury: yesNoSchema,
-      injuryDetails: z
-        .string()
-        .trim()
-        .optional()
-        .transform((value) => value || undefined)
-        .default(''),
-      physicianCleared: z
-        .string()
-        .trim()
-        .transform((value) => (value.length ? value : undefined))
-        .optional()
-        .pipe(yesNoSchema.optional()),
-      clearanceNotes: z
-        .string()
-        .trim()
-        .optional()
-        .transform((value) => value || undefined)
-        .default(''),
     })
     .superRefine((value, ctx) => {
       if (value.hadRecentInjury === 'yes' && !value.injuryDetails?.trim()) {

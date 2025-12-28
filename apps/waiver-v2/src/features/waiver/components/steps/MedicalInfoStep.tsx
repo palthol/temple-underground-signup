@@ -2,11 +2,9 @@ import React from 'react'
 import { useFormContext } from 'react-hook-form'
 import type { WaiverFormInput } from '../../hooks/useWaiverForm'
 import { useI18n } from '../../../../shared/i18n/I18nProvider'
-
-const yesNoOptions = (t: ReturnType<typeof useI18n>['t']) => [
-  { value: 'yes', label: t('common.yes') },
-  { value: 'no', label: t('common.no') },
-]
+import { SectionCard } from '../common/SectionCard'
+import { Field, checkboxClasses, inputBaseClasses, textareaBaseClasses } from '../common/Field'
+import { Chip } from '../common/Chip'
 
 const healthKeys: (keyof WaiverFormInput['medicalInformation'])[] = [
   'heartDisease',
@@ -35,7 +33,6 @@ export const MedicalInfoStep: React.FC = () => {
     formState: { errors },
   } = useFormContext<WaiverFormInput>()
 
-  const yesNo = React.useMemo(() => yesNoOptions(t), [t])
   const medical = watch('medicalInformation')
 
   const medicalError = <K extends keyof WaiverFormInput['medicalInformation']>(key: K) =>
@@ -45,160 +42,156 @@ export const MedicalInfoStep: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <header className="space-y-1">
-        <h2 className="text-base font-semibold text-slate-800">{t('medicalInfo.title')}</h2>
-        <p className="text-sm text-slate-600">{t('medicalInfo.description')}</p>
-      </header>
-
-      <section className="space-y-4">
-        <div>
-          <h3 className="text-sm font-semibold text-slate-700">{t('medicalInfo.sections.health.title')}</h3>
-          <p className="text-xs text-slate-500">{t('medicalInfo.sections.health.instructions')}</p>
-        </div>
-        <div className="grid gap-4 md:grid-cols-2">
-          {healthKeys.map((key) => (
-            <label key={key} className="flex items-center justify-between rounded border p-3 text-sm">
-              <span className="pr-4 text-slate-700">{t(`medicalInfo.sections.health.fields.${key}`)}</span>
-              <input
-                type="checkbox"
-                {...register(`medicalInformation.${key}`)}
-                checked={Boolean(medical?.[key])}
-              />
-            </label>
-          ))}
-        </div>
-
-        <div className="grid gap-3 md:grid-cols-2">
-          <div>
-            <label className="block text-sm font-medium text-slate-700">
-              {t('medicalInfo.sections.additional.lastPhysical')}
-            </label>
-            <input
-              type="date"
-              className="mt-1 w-full rounded border border-gray-300 p-2 text-sm"
-              {...register('medicalInformation.lastPhysical')}
-            />
-            {medicalError('lastPhysical') && (
-              <p className="mt-1 text-xs text-red-600">{medicalError('lastPhysical')}</p>
-            )}
+      <SectionCard
+        title={t('medicalInfo.title')}
+        subtitle={t('medicalInfo.description')}
+      >
+        <div className="space-y-6">
+          <div className="space-y-3">
+            <h3 className="text-sm font-semibold uppercase tracking-[0.25em] text-brand-secondary">
+              {t('medicalInfo.sections.health.title')}
+            </h3>
+            <p className="text-sm text-brand-secondary/75">{t('medicalInfo.sections.health.instructions')}</p>
+            <div className="grid gap-4 md:grid-cols-2">
+              {healthKeys.map((key) => {
+                const isChecked = Boolean(medical?.[key])
+                return (
+                  <label
+                    key={key}
+                    className={`flex items-center justify-between rounded-xl border px-4 py-3 text-sm font-medium transition ${
+                      isChecked
+                        ? 'border-brand-primary bg-brand-primary/10 text-brand-primary'
+                        : 'border-brand-outline/50 bg-brand-surface text-brand-on-surface'
+                    }`}
+                  >
+                    <span className="pr-4">{t(`medicalInfo.sections.health.fields.${key}`)}</span>
+                    <input type="checkbox" className={checkboxClasses} {...register(`medicalInformation.${key}`)} />
+                  </label>
+                )
+              })}
+            </div>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-slate-700">
-              {t('medicalInfo.sections.additional.exerciseRestriction')}
-            </label>
-            <textarea
-              rows={3}
-              className="mt-1 w-full rounded border border-gray-300 p-2 text-sm"
-              {...register('medicalInformation.exerciseRestriction')}
-            />
+
+          <div className="grid gap-6 md:grid-cols-2">
+            <Field
+              label={t('medicalInfo.sections.additional.lastPhysical')}
+              error={medicalError('lastPhysical') || undefined}
+            >
+              <input type="date" className={inputBaseClasses} {...register('medicalInformation.lastPhysical')} />
+            </Field>
+            <Field label={t('medicalInfo.sections.additional.exerciseRestriction')}>
+              <textarea className={textareaBaseClasses} rows={3} {...register('medicalInformation.exerciseRestriction')} />
+            </Field>
           </div>
         </div>
-      </section>
+      </SectionCard>
 
-      <section className="space-y-3 border-t pt-4">
-        <div>
-          <h3 className="text-sm font-semibold text-slate-700">{t('medicalInfo.sections.injuries.title')}</h3>
-          <p className="text-xs text-slate-500">{t('medicalInfo.sections.injuries.instructions')}</p>
+      <SectionCard
+        title={t('medicalInfo.sections.injuries.title')}
+        subtitle={t('medicalInfo.sections.injuries.instructions')}
+      >
+        <div className="flex flex-wrap gap-3">
+          {injuryOptions.map(([key, labelKey]) => {
+            const active = Boolean(medical?.injuries?.[key])
+            return (
+              <label key={key} className="inline-flex items-center gap-3">
+                <Chip label={t(labelKey)} active={active} />
+                <input type="checkbox" className={checkboxClasses} {...register(`medicalInformation.injuries.${key}`)} />
+              </label>
+            )
+          })}
         </div>
-        <div className="flex flex-col gap-2">
-          {injuryOptions.map(([key, labelKey]) => (
-            <label key={key} className="flex items-center gap-2 text-sm">
-              <input type="checkbox" {...register(`medicalInformation.injuries.${key}`)} />
-              <span>{t(labelKey)}</span>
-            </label>
-          ))}
-        </div>
-        <div className="space-y-2">
-          <label className="flex items-center gap-2 text-sm">
-            <input type="checkbox" {...register('medicalInformation.injuries.other.has')} />
+
+        <div className="mt-6 space-y-3">
+          <label className="inline-flex items-center gap-3 text-sm font-semibold text-brand-on-surface">
+            <input type="checkbox" className={checkboxClasses} {...register('medicalInformation.injuries.other.has')} />
             <span>{t('medicalInfo.sections.injuries.fields.other')}</span>
           </label>
           {medical?.injuries?.other?.has && (
             <input
               type="text"
-              className="w-full rounded border border-gray-300 p-2 text-sm"
+              className={inputBaseClasses}
               placeholder={t('medicalInfo.sections.injuries.otherPlaceholder')}
               {...register('medicalInformation.injuries.other.details')}
             />
           )}
-          {injuryOtherError && <p className="text-xs text-red-600">{injuryOtherError}</p>}
+          {injuryOtherError && <p className="text-xs font-medium text-brand-error">{injuryOtherError}</p>}
         </div>
-      </section>
+      </SectionCard>
 
-      <section className="space-y-3 border-t pt-4">
-        <div>
-          <h3 className="text-sm font-semibold text-slate-700">{t('medicalInfo.sections.recent.title')}</h3>
-          <p className="text-xs text-slate-500">{t('medicalInfo.sections.recent.instructions')}</p>
-        </div>
+      <SectionCard
+        title={t('medicalInfo.sections.recent.title')}
+        subtitle={t('medicalInfo.sections.recent.instructions')}
+      >
+        <div className="space-y-4">
+          <Field
+            label={t('medicalInfo.sections.recent.question')}
+            error={medicalError('hadRecentInjury') || undefined}
+          >
+            <div className="flex flex-wrap gap-4">
+              {(['yes', 'no'] as const).map((option) => (
+                <label
+                  key={option}
+                  className={`inline-flex items-center gap-3 rounded-full border px-4 py-2 text-sm font-semibold uppercase tracking-[0.18em] transition ${
+                    medical?.hadRecentInjury === option
+                      ? 'border-brand-primary bg-brand-primary/10 text-brand-primary'
+                      : 'border-brand-outline/60 bg-brand-surface text-brand-secondary'
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    value={option}
+                    className={checkboxClasses}
+                    {...register('medicalInformation.hadRecentInjury')}
+                    checked={medical?.hadRecentInjury === option}
+                  />
+                  {t(`common.${option === 'yes' ? 'yes' : 'no'}`)}
+                </label>
+              ))}
+            </div>
+          </Field>
 
-        <div className="space-y-2">
-          <p className="text-sm text-slate-700">{t('medicalInfo.sections.recent.question')}</p>
-          <div className="flex gap-4">
-            {yesNo.map((option) => (
-              <label key={option.value} className="flex items-center gap-2 text-sm">
-                <input
-                  type="radio"
-                  value={option.value}
-                  {...register('medicalInformation.hadRecentInjury')}
-                  checked={medical?.hadRecentInjury === option.value}
+          {medical?.hadRecentInjury === 'yes' && (
+            <div className="grid gap-6 lg:grid-cols-2">
+              <Field
+                label={t('medicalInfo.sections.recent.details')}
+                error={medicalError('injuryDetails') || undefined}
+                className="lg:col-span-2"
+              >
+                <textarea
+                  className={textareaBaseClasses}
+                  rows={3}
+                  {...register('medicalInformation.injuryDetails')}
                 />
-                <span>{option.label}</span>
-              </label>
-            ))}
-          </div>
-          {medicalError('hadRecentInjury') && (
-            <p className="text-xs text-red-600">{medicalError('hadRecentInjury')}</p>
+              </Field>
+
+              <Field
+                label={t('medicalInfo.sections.recent.physician')}
+                error={medicalError('physicianCleared') || undefined}
+              >
+                <div className="flex gap-4">
+                  {(['yes', 'no'] as const).map((option) => (
+                    <label key={option} className="inline-flex items-center gap-2 text-sm font-medium text-brand-on-surface">
+                      <input
+                        type="radio"
+                        value={option}
+                        className={checkboxClasses}
+                        {...register('medicalInformation.physicianCleared')}
+                        checked={medical?.physicianCleared === option}
+                      />
+                      {t(`common.${option === 'yes' ? 'yes' : 'no'}`)}
+                    </label>
+                  ))}
+                </div>
+              </Field>
+
+              <Field label={t('medicalInfo.sections.recent.notes')} className="lg:col-span-2">
+                <textarea className={textareaBaseClasses} rows={3} {...register('medicalInformation.clearanceNotes')} />
+              </Field>
+            </div>
           )}
         </div>
-
-        {medical?.hadRecentInjury === 'yes' && (
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-slate-700">
-              {t('medicalInfo.sections.recent.details')}
-            </label>
-            <textarea
-              rows={3}
-              className="mt-1 w-full rounded border border-gray-300 p-2 text-sm"
-              {...register('medicalInformation.injuryDetails')}
-            />
-            {medicalError('injuryDetails') && (
-              <p className="text-xs text-red-600">{medicalError('injuryDetails')}</p>
-            )}
-            <div className="space-y-2">
-              <p className="text-sm text-slate-700">{t('medicalInfo.sections.recent.physician')}</p>
-              <div className="flex gap-4">
-                {yesNo.map((option) => (
-                  <label key={option.value} className="flex items-center gap-2 text-sm">
-                    <input
-                      type="radio"
-                      value={option.value}
-                      {...register('medicalInformation.physicianCleared')}
-                      checked={medical?.physicianCleared === option.value}
-                    />
-                    <span>{option.label}</span>
-                  </label>
-                ))}
-              </div>
-              {medicalError('physicianCleared') && (
-                <p className="text-xs text-red-600">{medicalError('physicianCleared')}</p>
-              )}
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-slate-700">
-                {t('medicalInfo.sections.recent.notes')}
-              </label>
-              <textarea
-                rows={3}
-                className="mt-1 w-full rounded border border-gray-300 p-2 text-sm"
-                {...register('medicalInformation.clearanceNotes')}
-              />
-              {medicalError('clearanceNotes') && (
-                <p className="text-xs text-red-600">{medicalError('clearanceNotes')}</p>
-              )}
-            </div>
-          </div>
-        )}
-      </section>
+      </SectionCard>
     </div>
   )
 }

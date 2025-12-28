@@ -2,6 +2,8 @@ import React from 'react'
 import { useFormContext } from 'react-hook-form'
 import type { WaiverFormInput } from '../../hooks/useWaiverForm'
 import { useI18n } from '../../../../shared/i18n/I18nProvider'
+import { SectionCard } from '../common/SectionCard'
+import { Field, inputBaseClasses } from '../common/Field'
 
 export const PersonalInfoStep: React.FC = () => {
   const { t } = useI18n()
@@ -15,157 +17,68 @@ export const PersonalInfoStep: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <header className="space-y-2">
-        <h2 className="text-base font-semibold text-slate-800">{t('personalInfo.title')}</h2>
-        <p className="text-sm text-slate-600">{t('personalInfo.description')}</p>
-      </header>
-
-      <div className="grid gap-4">
-        <div>
-          <label className="block text-sm font-medium text-slate-700">{t('personalInfo.fields.fullName')}</label>
-          <input
-            type="text"
-            className="mt-1 w-full rounded border border-gray-300 p-2 text-sm"
-            {...register(field('fullName'))}
-          />
-          {errorMessage('fullName') && <p className="mt-1 text-xs text-red-600">{errorMessage('fullName')}</p>}
+      <SectionCard
+        title={t('personalInfo.title')}
+        subtitle={t('personalInfo.description')}
+      >
+        <div className="grid gap-6 lg:grid-cols-2">
+          <Field label={t('personalInfo.fields.fullName')} required error={errorMessage('fullName') || undefined}>
+            <input type="text" className={inputBaseClasses} {...register(field('fullName'))} />
+          </Field>
+          <Field
+            label={t('personalInfo.fields.dateOfBirth')}
+            required
+            error={errorMessage('dateOfBirth') || undefined}
+          >
+            <input type="date" className={inputBaseClasses} {...register(field('dateOfBirth'))} />
+          </Field>
+          <Field
+            label={t('personalInfo.fields.addressLine1')}
+            required
+            error={errorMessage('addressLine1') || undefined}
+          >
+            <input type="text" className={inputBaseClasses} {...register(field('addressLine1'))} />
+          </Field>
+          <Field label={t('personalInfo.fields.addressLine2')} error={errorMessage('addressLine2') || undefined}>
+            <input type="text" className={inputBaseClasses} {...register(field('addressLine2'))} />
+          </Field>
+          <Field label={t('personalInfo.fields.city')} required error={errorMessage('city') || undefined}>
+            <input type="text" className={inputBaseClasses} {...register(field('city'))} />
+          </Field>
+          <Field label={t('personalInfo.fields.state')} required error={errorMessage('state') || undefined}>
+            <input type="text" className={inputBaseClasses} {...register(field('state'))} />
+          </Field>
+          <Field label={t('personalInfo.fields.postalCode')} required error={errorMessage('postalCode') || undefined}>
+            <input type="text" className={inputBaseClasses} {...register(field('postalCode'))} />
+          </Field>
+          <Field label={t('personalInfo.fields.email')} required error={errorMessage('email') || undefined}>
+            <input type="email" className={inputBaseClasses} {...register(field('email'))} />
+          </Field>
+          <Field label={t('personalInfo.fields.phone')} required error={errorMessage('phone') || undefined}>
+            <input type="tel" className={inputBaseClasses} {...register(field('phone'))} />
+          </Field>
         </div>
+      </SectionCard>
 
-        <div>
-          <label className="block text-sm font-medium text-slate-700">{t('personalInfo.fields.dateOfBirth')}</label>
-          <input
-            type="date"
-            className="mt-1 w-full rounded border border-gray-300 p-2 text-sm"
-            {...register(field('dateOfBirth'))}
-          />
-          {errorMessage('dateOfBirth') && <p className="mt-1 text-xs text-red-600">{errorMessage('dateOfBirth')}</p>}
+      <SectionCard
+        title={t('personalInfo.fields.emergency.section')}
+        subtitle={t('personalInfo.fields.emergency.instructions')}
+      >
+        <div className="grid gap-6 lg:grid-cols-2">
+          <Field label={t('personalInfo.fields.emergency.name')}>
+            <input type="text" className={inputBaseClasses} {...register('emergencyContact.name')} />
+          </Field>
+          <Field label={t('personalInfo.fields.emergency.relationship')}>
+            <input type="text" className={inputBaseClasses} {...register('emergencyContact.relationship')} />
+          </Field>
+          <Field label={t('personalInfo.fields.emergency.phone')}>
+            <input type="tel" className={inputBaseClasses} {...register('emergencyContact.phone')} />
+          </Field>
+          <Field label={t('personalInfo.fields.emergency.email')}>
+            <input type="email" className={inputBaseClasses} {...register('emergencyContact.email')} />
+          </Field>
         </div>
-
-        <div>
-          <label className="block text-sm font-medium text-slate-700">{t('personalInfo.fields.addressLine1')}</label>
-          <input
-            type="text"
-            className="mt-1 w-full rounded border border-gray-300 p-2 text-sm"
-            {...register(field('addressLine1'))}
-          />
-          {errorMessage('addressLine1') && <p className="mt-1 text-xs text-red-600">{errorMessage('addressLine1')}</p>}
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-slate-700">{t('personalInfo.fields.addressLine2')}</label>
-          <input
-            type="text"
-            className="mt-1 w-full rounded border border-gray-300 p-2 text-sm"
-            {...register(field('addressLine2'))}
-          />
-          {errorMessage('addressLine2') && <p className="mt-1 text-xs text-red-600">{errorMessage('addressLine2')}</p>}
-        </div>
-
-        <div className="grid gap-4 md:grid-cols-2">
-          <div>
-            <label className="block text-sm font-medium text-slate-700">{t('personalInfo.fields.city')}</label>
-            <input
-              type="text"
-              className="mt-1 w-full rounded border border-gray-300 p-2 text-sm"
-              {...register(field('city'))}
-            />
-            {errorMessage('city') && <p className="mt-1 text-xs text-red-600">{errorMessage('city')}</p>}
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-slate-700">{t('personalInfo.fields.state')}</label>
-            <input
-              type="text"
-              className="mt-1 w-full rounded border border-gray-300 p-2 text-sm"
-              {...register(field('state'))}
-            />
-            {errorMessage('state') && <p className="mt-1 text-xs text-red-600">{errorMessage('state')}</p>}
-          </div>
-        </div>
-
-        <div className="grid gap-4 md:grid-cols-2">
-          <div>
-            <label className="block text-sm font-medium text-slate-700">{t('personalInfo.fields.postalCode')}</label>
-            <input
-              type="text"
-              className="mt-1 w-full rounded border border-gray-300 p-2 text-sm"
-              {...register(field('postalCode'))}
-            />
-            {errorMessage('postalCode') && <p className="mt-1 text-xs text-red-600">{errorMessage('postalCode')}</p>}
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-slate-700">{t('personalInfo.fields.email')}</label>
-            <input
-              type="email"
-              className="mt-1 w-full rounded border border-gray-300 p-2 text-sm"
-              {...register(field('email'))}
-            />
-            {errorMessage('email') && <p className="mt-1 text-xs text-red-600">{errorMessage('email')}</p>}
-          </div>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-slate-700">{t('personalInfo.fields.phone')}</label>
-          <input
-            type="tel"
-            className="mt-1 w-full rounded border border-gray-300 p-2 text-sm"
-            {...register(field('phone'))}
-          />
-          {errorMessage('phone') && <p className="mt-1 text-xs text-red-600">{errorMessage('phone')}</p>}
-        </div>
-      </div>
-
-      <div className="space-y-3 border-t pt-4">
-        <header className="space-y-1">
-          <h3 className="text-sm font-semibold text-slate-700">{t('personalInfo.fields.emergency.section')}</h3>
-          <p className="text-xs text-slate-500">{t('personalInfo.fields.emergency.instructions')}</p>
-        </header>
-
-        <div className="grid gap-4 md:grid-cols-2">
-          <div>
-            <label className="block text-sm font-medium text-slate-700">
-              {t('personalInfo.fields.emergency.name')}
-            </label>
-            <input
-              type="text"
-              className="mt-1 w-full rounded border border-gray-300 p-2 text-sm"
-              {...register('emergencyContact.name')}
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-slate-700">
-              {t('personalInfo.fields.emergency.relationship')}
-            </label>
-            <input
-              type="text"
-              className="mt-1 w-full rounded border border-gray-300 p-2 text-sm"
-              {...register('emergencyContact.relationship')}
-            />
-          </div>
-        </div>
-
-        <div className="grid gap-4 md:grid-cols-2">
-          <div>
-            <label className="block text-sm font-medium text-slate-700">
-              {t('personalInfo.fields.emergency.phone')}
-            </label>
-            <input
-              type="tel"
-              className="mt-1 w-full rounded border border-gray-300 p-2 text-sm"
-              {...register('emergencyContact.phone')}
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-slate-700">
-              {t('personalInfo.fields.emergency.email')}
-            </label>
-            <input
-              type="email"
-              className="mt-1 w-full rounded border border-gray-300 p-2 text-sm"
-              {...register('emergencyContact.email')}
-            />
-          </div>
-        </div>
-      </div>
+      </SectionCard>
     </div>
   )
 }
