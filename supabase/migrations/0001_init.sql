@@ -1,3 +1,6 @@
+-- Enable pgcrypto extension for gen_random_uuid()
+create extension if not exists pgcrypto;
+
 -- Enable unaccent extension optionally for accent-insensitive search
 -- create extension if not exists unaccent;
 
