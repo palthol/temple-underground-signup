@@ -61,8 +61,8 @@ export default function HomePage() {
             transition={{ duration: 0.6, delay: 0.1 }}
             className="mt-6 max-w-2xl text-base leading-7 text-temple-snow/82 sm:text-lg"
           >
-            We coach warriors and martial artists, not cardio tourists. Every class is built on breathing, conditioning, and skill so
-            you become harder to break and smarter in motion.
+            We create warriors and martial artists, not cardio tourists. Every class is built on breathing, conditioning, and skill so
+            you become resilient and smarter in motion.
           </motion.p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Link
@@ -84,8 +84,8 @@ export default function HomePage() {
       <section className="container-shell py-16 sm:py-20">
         <SectionHeader
           eyebrow="Our System"
-          title="Breathing. Conditioning. Skill."
-          description="Temple Underground classes are layered and coach-led. Every round has intent, progression, and measurable standards."
+          title="Breath. Structure. Movement."
+          description="Temple Underground classes are layered and instructor-led. Every round has intent, progression, and measurable standards."
         />
         <div className="mt-8 grid gap-5 md:grid-cols-3">
           <article className="rounded-xl border border-temple-charcoal bg-temple-charcoal/35 p-6">
@@ -99,14 +99,14 @@ export default function HomePage() {
             <Dumbbell className="text-temple-gold" />
             <h3 className="mt-4 text-lg font-semibold">Conditioning</h3>
             <p className="mt-2 text-sm text-temple-snow/80">
-              We build work capacity and durability for performance, not mirror metrics. You feel stronger where it counts.
+              We build the the body for performance, not mirror metrics. You feel stronger where it counts.
             </p>
           </article>
           <article className="rounded-xl border border-temple-charcoal bg-temple-charcoal/35 p-6">
             <ShieldCheck className="text-temple-gold" />
             <h3 className="mt-4 text-lg font-semibold">Skill</h3>
             <p className="mt-2 text-sm text-temple-snow/80">
-              Boxing, BJJ, clinch transitions, movement, and fundamentals. Technique first, pressure tested over time.
+              Boxing, BJJ, movement, and fundamentals. Technique first, pressure tested over time.
             </p>
           </article>
         </div>
