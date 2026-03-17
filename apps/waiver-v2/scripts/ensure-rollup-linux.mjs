@@ -1,4 +1,6 @@
 import { execSync } from 'node:child_process'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 
 const isLinuxX64 = process.platform === 'linux' && process.arch === 'x64'
 
@@ -11,11 +13,9 @@ const optionalNativeModules = [
   'lightningcss-linux-x64-gnu',
 ]
 
-for (const moduleName of optionalNativeModules) {
-  try {
-    await import(moduleName)
-  } catch {
-    console.log(`[build] Missing ${moduleName}; installing fallback...`)
-    execSync(`npm i --no-save ${moduleName}`, { stdio: 'inherit' })
-  }
-}
+const scriptDir = path.dirname(fileURLToPath(import.meta.url))
+const workspaceRoot = path.resolve(scriptDir, '..', '..', '..')
+const installList = optionalNativeModules.join(' ')
+
+console.log(`[build] Ensuring Linux native modules in workspace root: ${installList}`)
+execSync(`npm i --no-save --prefix "${workspaceRoot}" ${installList}`, { stdio: 'inherit' })
