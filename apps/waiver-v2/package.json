@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build": "node scripts/ensure-rollup-linux.mjs && tsc && vite build",
     "preview": "vite preview"
   },
   "devDependencies": {
