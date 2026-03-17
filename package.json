@@ -2,6 +2,10 @@
   "name": "temple-underground-signup",
   "private": true,
   "version": "0.1.0",
+  "engines": {
+    "node": "22.x",
+    "npm": "10.x"
+  },
   "workspaces": [
     "apps/*",
     "services/*"
