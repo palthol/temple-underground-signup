@@ -6,11 +6,16 @@ if (!isLinuxX64) {
   process.exit(0)
 }
 
-const moduleName = '@rollup/rollup-linux-x64-gnu'
+const optionalNativeModules = [
+  '@rollup/rollup-linux-x64-gnu',
+  'lightningcss-linux-x64-gnu',
+]
 
-try {
-  await import(moduleName)
-} catch {
-  console.log(`[build] Missing ${moduleName}; installing fallback...`)
-  execSync(`npm i --no-save ${moduleName}`, { stdio: 'inherit' })
+for (const moduleName of optionalNativeModules) {
+  try {
+    await import(moduleName)
+  } catch {
+    console.log(`[build] Missing ${moduleName}; installing fallback...`)
+    execSync(`npm i --no-save ${moduleName}`, { stdio: 'inherit' })
+  }
 }
