@@ -1,5 +1,5 @@
 import React from 'react'
-import { useForm, type UseFormReturn } from 'react-hook-form'
+import { useForm, type Resolver, type UseFormReturn } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { createWaiverSchema, stepFieldPaths } from '../schema/waiver'
 import { z } from 'zod'
@@ -83,9 +83,13 @@ const createDefaultValues = (): WaiverFormInput => ({
 export const useWaiverForm = (t: Translate) => {
   const schema = React.useMemo(() => createWaiverSchema(t), [t])
   const defaultValues = React.useMemo(() => createDefaultValues(), [])
+  const resolver = React.useMemo(
+    () => zodResolver(schema) as unknown as Resolver<WaiverFormInput>,
+    [schema],
+  )
 
   const methods = useForm<WaiverFormInput>({
-    resolver: zodResolver(schema),
+    resolver,
     mode: 'onBlur',
     defaultValues,
   })

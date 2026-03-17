@@ -5,6 +5,8 @@ import { buildApiUrl } from './client'
 export type SubmitWaiverSuccess = {
   waiverId: string
   participantId: string
+  accountId?: string
+  accountMemberId?: string
   sha256: string
 }
 
@@ -200,6 +202,8 @@ export const submitWaiver = async (
 
     const waiverId = typeof json.waiverId === 'string' ? json.waiverId : undefined
     const participantId = typeof json.participantId === 'string' ? json.participantId : undefined
+    const accountId = typeof json.accountId === 'string' ? json.accountId : undefined
+    const accountMemberId = typeof json.accountMemberId === 'string' ? json.accountMemberId : undefined
     const sha256 = typeof json.sha256 === 'string' ? json.sha256 : ''
 
     if (!waiverId || !participantId) {
@@ -211,6 +215,8 @@ export const submitWaiver = async (
       data: {
         waiverId,
         participantId,
+        accountId,
+        accountMemberId,
         sha256,
       },
     }

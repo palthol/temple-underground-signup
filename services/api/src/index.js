@@ -5,6 +5,7 @@ import { PDFDocument, StandardFonts } from 'pdf-lib';
 import crypto from 'node:crypto';
 import { createClient } from '@supabase/supabase-js';
 import { createWaiverPdfRouter } from './routes/waivers/pdf.js';
+import { createOrBindParticipantAccount } from './services/accounts/createOrBindParticipantAccount.js';
 
 const app = express();
 // CORS: allow configured origin or all in dev
@@ -222,6 +223,31 @@ app.post('/api/waivers/submit', async (req, res) => {
       }
     }
 
+    // Create or bind billing account tether so downstream automations
+    // can reliably resolve account context from participant_id.
+    let accountBinding;
+    try {
+      accountBinding = await createOrBindParticipantAccount({
+        supabase,
+        participantId,
+        participant,
+      });
+      console.info('account.binding outcome', {
+        participantId,
+        accountId: accountBinding.accountId,
+        accountMemberId: accountBinding.accountMemberId,
+        accountMemberRole: accountBinding.accountMemberRole,
+        createdAccount: accountBinding.createdAccount,
+        createdMembership: accountBinding.createdMembership,
+      });
+    } catch (bindingError) {
+      console.error('account.binding error', bindingError);
+      return res.status(500).json({
+        ok: false,
+        errors: [{ field: 'account', messageKey: 'server.db_bind_account_failed' }],
+      });
+    }
+
     // Create waiver id to use for storage keys
     const waiverId = crypto.randomUUID();
 
@@ -332,7 +358,14 @@ app.post('/api/waivers/submit', async (req, res) => {
       if (aErr) console.error('audit_trails.insert error', aErr);
     }
 
-    return res.json({ ok: true, waiverId, participantId, sha256: hash });
+    return res.json({
+      ok: true,
+      waiverId,
+      participantId,
+      accountId: accountBinding.accountId,
+      accountMemberId: accountBinding.accountMemberId,
+      sha256: hash,
+    });
   } catch (e) {
     console.error(e);
     return res.status(500).json({ ok: false, error: 'server_error' });
