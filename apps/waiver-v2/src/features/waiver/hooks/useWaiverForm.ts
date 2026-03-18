@@ -27,7 +27,7 @@ export type UseWaiverFormReturn = {
   stepFields: typeof stepFieldPaths
 }
 
-const createDefaultValues = (): WaiverFormInput => ({
+export const createDefaultValues = (): WaiverFormInput => ({
   personalInfo: {
     fullName: '',
     dateOfBirth: '',

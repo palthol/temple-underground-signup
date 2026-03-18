@@ -25,9 +25,32 @@ export const LegalConfirmationStep: React.FC = () => {
   } = useFormContext<WaiverFormInput>()
 
   const signatureValue = watch('legalConfirmation.signature') as SignatureValue | undefined
+  const sharedInitials = (watch('legalConfirmation.riskInitials') ?? '').toUpperCase()
 
   const legalError = <K extends keyof WaiverFormInput['legalConfirmation']>(key: K) =>
     errors.legalConfirmation?.[key]?.message
+
+  const applySharedInitials = React.useCallback(
+    (rawValue: string) => {
+      const normalized = rawValue
+        .replaceAll(/[^a-z]/gi, '')
+        .slice(0, 2)
+        .toUpperCase()
+      const targets: (keyof WaiverFormInput['legalConfirmation'])[] = [
+        'riskInitials',
+        'releaseInitials',
+        'indemnificationInitials',
+        'mediaInitials',
+      ]
+      targets.forEach((target) => {
+        setValue(`legalConfirmation.${target}`, normalized, {
+          shouldDirty: true,
+          shouldValidate: true,
+        })
+      })
+    },
+    [setValue],
+  )
 
   return (
     <div className="space-y-6">
@@ -36,6 +59,25 @@ export const LegalConfirmationStep: React.FC = () => {
         subtitle={t('legalConfirmation.description')}
       >
         <div className="space-y-6">
+          <div className="rounded-xl border border-brand-outline/40 bg-brand-surface-variant/60 p-5">
+            <Field
+              label={t('legalConfirmation.fields.sharedInitials')}
+              description={t('legalConfirmation.fields.sharedInitialsHint')}
+              error={legalError('riskInitials') || undefined}
+              className="max-w-[160px]"
+            >
+              <input
+                type="text"
+                maxLength={2}
+                  inputMode="text"
+                  autoCapitalize="characters"
+                value={sharedInitials}
+                onChange={(event) => applySharedInitials(event.target.value)}
+                className={`${inputBaseClasses} text-center uppercase tracking-[0.25em]`}
+              />
+            </Field>
+          </div>
+
           {clauseKeys.map(({ key, titleKey, bodyKey }) => (
             <div key={key} className="space-y-2 rounded-xl border border-brand-outline/40 bg-brand-surface-variant/40 p-5">
               <h3 className="text-sm font-semibold text-brand-on-surface">{t(titleKey)}</h3>
@@ -48,8 +90,10 @@ export const LegalConfirmationStep: React.FC = () => {
                 <input
                   type="text"
                   maxLength={2}
-                  className={`${inputBaseClasses} text-center uppercase tracking-[0.25em]`}
-                  {...register(`legalConfirmation.${key}`)}
+                  readOnly
+                  value={sharedInitials}
+                  aria-readonly="true"
+                  className={`${inputBaseClasses} cursor-not-allowed text-center uppercase tracking-[0.25em]`}
                 />
               </Field>
             </div>

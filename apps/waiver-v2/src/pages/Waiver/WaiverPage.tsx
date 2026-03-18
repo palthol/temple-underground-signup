@@ -4,9 +4,9 @@ import { useI18n } from '../../shared/i18n/I18nProvider'
 import { WaiverWizardLayout } from '../../features/waiver/components/Wizard/WaiverWizardLayout'
 import type { ServiceStatus } from '../../features/waiver/components/Wizard/WaiverWizardLayout'
 import { StepNavigation } from '../../features/waiver/components/Wizard/StepNavigation'
-import { useWaiverForm, type WaiverFormInput } from '../../features/waiver/hooks/useWaiverForm'
+import { createDefaultValues, useWaiverForm, type WaiverFormInput } from '../../features/waiver/hooks/useWaiverForm'
 import { useWaiverSteps } from '../../features/waiver/hooks/useWaiverSteps'
-import { PersonalInfoStep, MedicalInfoStep, LegalConfirmationStep, ReviewStep } from '../../features/waiver/components/steps'
+import { HouseholdReuseStep, PersonalInfoStep, MedicalInfoStep, LegalConfirmationStep, ReviewStep } from '../../features/waiver/components/steps'
 import { getStepSchema } from '../../features/waiver/schema/waiver'
 import { z } from 'zod'
 import { submitWaiver, type SubmitWaiverFieldError, type SubmitWaiverSuccess } from '../../features/waiver/api/submitWaiver'
@@ -14,11 +14,11 @@ import { getWaiverPdf } from '../../features/waiver/api/getWaiverPdf'
 import { fillSampleWaiver } from '../../features/waiver/utils/sampleWaiver'
 import { SectionCard } from '../../features/waiver/components/common/SectionCard'
 
-const stepTitles = [
-  'Personal & Emergency Information',
-  'Medical Information',
-  'Legal Confirmation',
-  'Review & Submit',
+const stepTitleKeys = [
+  'personalInfo.title',
+  'medicalInfo.title',
+  'legalConfirmation.title',
+  'review.title',
 ]
 
 const stepIds = ([
@@ -28,11 +28,48 @@ const stepIds = ([
   'review',
 ] as const)
 
+type SignupMode = 'self' | 'other' | 'self_and_others'
+
+type SessionConfig = {
+  mode: SignupMode
+  totalPeople: number
+}
+
+type HouseholdContext = {
+  householdAddress: Pick<WaiverFormInput['personalInfo'], 'addressLine1' | 'addressLine2' | 'city' | 'state' | 'postalCode'>
+  guardianContact: Pick<WaiverFormInput['personalInfo'], 'phone' | 'email'>
+  householdLastName: string
+  emergencyContact: WaiverFormInput['emergencyContact']
+}
+
+type ReuseOptions = {
+  address: boolean
+  guardianContact: boolean
+  lastName: boolean
+  emergencyContact: boolean
+}
+
+const createDefaultReuseOptions = (hasEmergencyContact: boolean): ReuseOptions => ({
+  address: true,
+  guardianContact: true,
+  lastName: true,
+  emergencyContact: hasEmergencyContact,
+})
+
 export const WaiverPage: React.FC = () => {
   const { t, locale } = useI18n()
   const { methods } = useWaiverForm(t)
   const total = stepIds.length
   const { index, isFirst, isLast, goBack, goNext, reset: resetSteps } = useWaiverSteps(total)
+  const [modeSelection, setModeSelection] = React.useState<SignupMode>('self')
+  const [modeCount, setModeCount] = React.useState<number>(2)
+  const [sessionConfig, setSessionConfig] = React.useState<SessionConfig | null>(null)
+  const [currentPersonIndex, setCurrentPersonIndex] = React.useState(1)
+  const [sessionResults, setSessionResults] = React.useState<SubmitWaiverSuccess[]>([])
+  const [householdContext, setHouseholdContext] = React.useState<HouseholdContext | null>(null)
+  const [showReuseStep, setShowReuseStep] = React.useState(false)
+  const [reuseOptions, setReuseOptions] = React.useState<ReuseOptions>(createDefaultReuseOptions(false))
+  const [prefillAppliedHint, setPrefillAppliedHint] = React.useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = React.useState(false)
   const [submitError, setSubmitError] = React.useState<string | null>(null)
   const [submitSuccess, setSubmitSuccess] = React.useState<SubmitWaiverSuccess | null>(null)
@@ -43,6 +80,7 @@ export const WaiverPage: React.FC = () => {
   const currentStepData = methods.watch(currentStepId as any)
   const validationResult = (currentSchema as z.ZodTypeAny).safeParse(currentStepData)
   const canAdvance = validationResult.success && !isSubmitting && !submitSuccess
+  const hasMorePeople = Boolean(sessionConfig && currentPersonIndex < sessionConfig.totalPeople)
 
   const serverFieldMap = React.useMemo(() => {
     const map = {
@@ -101,19 +139,132 @@ export const WaiverPage: React.FC = () => {
     [methods, serverFieldMap, t, translateMessageKey],
   )
 
+  const extractLastName = React.useCallback((fullName: string) => {
+    const parts = fullName
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean)
+    return parts.length > 1 ? parts.at(-1) ?? '' : ''
+  }, [])
+
+  const hasEmergencyContactValues = React.useCallback((emergencyContact: WaiverFormInput['emergencyContact']) => {
+    return Boolean(
+      emergencyContact.name?.trim() ||
+        emergencyContact.relationship?.trim() ||
+        emergencyContact.phone?.trim() ||
+        emergencyContact.email?.trim(),
+    )
+  }, [])
+
+  const buildHouseholdContext = React.useCallback(
+    (formValues: WaiverFormInput): HouseholdContext => ({
+      householdAddress: {
+        addressLine1: formValues.personalInfo.addressLine1 ?? '',
+        addressLine2: formValues.personalInfo.addressLine2 ?? '',
+        city: formValues.personalInfo.city ?? '',
+        state: formValues.personalInfo.state ?? '',
+        postalCode: formValues.personalInfo.postalCode ?? '',
+      },
+      guardianContact: {
+        phone: formValues.personalInfo.phone ?? '',
+        email: formValues.personalInfo.email ?? '',
+      },
+      householdLastName: extractLastName(formValues.personalInfo.fullName ?? ''),
+      emergencyContact: {
+        name: formValues.emergencyContact.name ?? '',
+        relationship: formValues.emergencyContact.relationship ?? '',
+        phone: formValues.emergencyContact.phone ?? '',
+        email: formValues.emergencyContact.email ?? '',
+      },
+    }),
+    [extractLastName],
+  )
+
+  const applyReusePrefills = React.useCallback(
+    (context: HouseholdContext, options: ReuseOptions) => {
+      methods.reset(createDefaultValues())
+      resetSteps()
+
+      if (options.address) {
+        methods.setValue('personalInfo.addressLine1', context.householdAddress.addressLine1 ?? '', { shouldDirty: true })
+        methods.setValue('personalInfo.addressLine2', context.householdAddress.addressLine2 ?? '', { shouldDirty: true })
+        methods.setValue('personalInfo.city', context.householdAddress.city ?? '', { shouldDirty: true })
+        methods.setValue('personalInfo.state', context.householdAddress.state ?? '', { shouldDirty: true })
+        methods.setValue('personalInfo.postalCode', context.householdAddress.postalCode ?? '', { shouldDirty: true })
+      }
+
+      if (options.guardianContact) {
+        methods.setValue('personalInfo.phone', context.guardianContact.phone ?? '', { shouldDirty: true })
+        methods.setValue('personalInfo.email', context.guardianContact.email ?? '', { shouldDirty: true })
+      }
+
+      if (options.lastName && context.householdLastName) {
+        methods.setValue('personalInfo.fullName', context.householdLastName, { shouldDirty: true })
+      }
+
+      if (options.emergencyContact) {
+        methods.setValue('emergencyContact.name', context.emergencyContact.name ?? '', { shouldDirty: true })
+        methods.setValue('emergencyContact.relationship', context.emergencyContact.relationship ?? '', { shouldDirty: true })
+        methods.setValue('emergencyContact.phone', context.emergencyContact.phone ?? '', { shouldDirty: true })
+        methods.setValue('emergencyContact.email', context.emergencyContact.email ?? '', { shouldDirty: true })
+      }
+
+      const appliedLabels: string[] = []
+      if (options.address) appliedLabels.push(t('householdReuse.options.address'))
+      if (options.guardianContact) appliedLabels.push(t('householdReuse.options.guardianContact'))
+      if (options.lastName && context.householdLastName) appliedLabels.push(t('householdReuse.options.lastName'))
+      if (options.emergencyContact) appliedLabels.push(t('householdReuse.options.emergencyContact'))
+      setPrefillAppliedHint(appliedLabels.length ? `${t('householdReuse.appliedPrefix')}: ${appliedLabels.join(', ')}` : null)
+    },
+    [methods, resetSteps, t],
+  )
+
   const handleStartOver = React.useCallback(() => {
-    methods.reset()
+    methods.reset(createDefaultValues())
     resetSteps()
     setSubmitSuccess(null)
     setSubmitError(null)
     setDownloadError(null)
+    setSessionResults([])
+    setSessionConfig(null)
+    setCurrentPersonIndex(1)
+    setHouseholdContext(null)
+    setShowReuseStep(false)
+    setReuseOptions(createDefaultReuseOptions(false))
+    setPrefillAppliedHint(null)
+    setModeSelection('self')
+    setModeCount(2)
   }, [methods, resetSteps])
+
+  const handleStartSession = React.useCallback(() => {
+    const normalizedCount = Number.isFinite(modeCount) ? Math.floor(modeCount) : 1
+    const totalPeople =
+      modeSelection === 'self'
+        ? 1
+        : modeSelection === 'self_and_others'
+          ? Math.max(2, normalizedCount)
+          : Math.max(1, normalizedCount)
+
+    setSessionConfig({ mode: modeSelection, totalPeople })
+    setCurrentPersonIndex(1)
+    setSessionResults([])
+    setSubmitSuccess(null)
+    setSubmitError(null)
+    setDownloadError(null)
+    setHouseholdContext(null)
+    setShowReuseStep(false)
+    setReuseOptions(createDefaultReuseOptions(false))
+    setPrefillAppliedHint(null)
+    methods.reset(createDefaultValues())
+    resetSteps()
+  }, [methods, modeCount, modeSelection, resetSteps])
 
   const handleFillSample = React.useCallback(() => {
     fillSampleWaiver(methods as unknown as Parameters<typeof fillSampleWaiver>[0])
     resetSteps()
     setSubmitError(null)
     setDownloadError(null)
+    setPrefillAppliedHint(null)
   }, [methods, resetSteps])
 
   const handleDownloadPdf = React.useCallback(async () => {
@@ -149,14 +300,43 @@ export const WaiverPage: React.FC = () => {
     }
   }, [submitSuccess, t, translateMessageKey])
 
+  const handleReuseContinue = React.useCallback(() => {
+    if (!householdContext) {
+      setShowReuseStep(false)
+      methods.reset(createDefaultValues())
+      resetSteps()
+      return
+    }
+
+    applyReusePrefills(householdContext, reuseOptions)
+    setShowReuseStep(false)
+    setSubmitError(null)
+    setDownloadError(null)
+  }, [applyReusePrefills, householdContext, methods, resetSteps, reuseOptions])
+
+  const handleReuseBack = React.useCallback(() => {
+    setShowReuseStep(false)
+    methods.reset(createDefaultValues())
+    resetSteps()
+    setPrefillAppliedHint(null)
+  }, [methods, resetSteps])
+
   const onBack = () => {
     if (submitSuccess) return
+    if (showReuseStep) {
+      handleReuseBack()
+      return
+    }
     setSubmitError(null)
     goBack()
   }
 
   const onNext = async () => {
     if (submitSuccess) return
+    if (showReuseStep) {
+      handleReuseContinue()
+      return
+    }
     if (!canAdvance) {
       validationResult.error?.issues.forEach((issue) => {
         const field = [currentStepId, ...(issue.path as (string | number)[])].join('.')
@@ -171,6 +351,23 @@ export const WaiverPage: React.FC = () => {
           setSubmitError(null)
           const result = await submitWaiver(formValues as unknown as WaiverFormInput, locale)
           if (result.ok) {
+            const nextResults = [...sessionResults, result.data]
+            setSessionResults(nextResults)
+
+            if (hasMorePeople) {
+              const nextHouseholdContext = householdContext ?? buildHouseholdContext(formValues)
+              const allowEmergencyReuse = hasEmergencyContactValues(nextHouseholdContext.emergencyContact)
+              setHouseholdContext(nextHouseholdContext)
+              setReuseOptions(createDefaultReuseOptions(allowEmergencyReuse))
+              methods.reset(createDefaultValues())
+              resetSteps()
+              setShowReuseStep(true)
+              setCurrentPersonIndex((prev) => prev + 1)
+              setDownloadError(null)
+              setPrefillAppliedHint(null)
+              return
+            }
+
             setSubmitSuccess(result.data)
             methods.reset(formValues)
             return
@@ -218,14 +415,98 @@ export const WaiverPage: React.FC = () => {
     }
   }
 
-  const stepTitle = submitSuccess ? t('submission.success.title') : stepTitles[index]
-  const stepIndicator = submitSuccess ? undefined : `Step ${index + 1} of ${total}`
+  const stepTitle = submitSuccess
+    ? t('submission.success.title')
+    : showReuseStep
+      ? t('householdReuse.title')
+      : t(stepTitleKeys[index])
+  const progressLabel = t('wizard.progress')
+    .replace('{current}', String(index + 1))
+    .replace('{total}', String(total))
+  const personIndicator =
+    sessionConfig && !submitSuccess
+      ? `${t('multiSignup.personIndicatorPrefix')} ${currentPersonIndex} ${t('multiSignup.personIndicatorSeparator')} ${sessionConfig.totalPeople}`
+      : null
+  const stepIndicator = submitSuccess
+    ? undefined
+    : showReuseStep
+      ? personIndicator ?? undefined
+    : personIndicator
+      ? `${personIndicator} • ${progressLabel}`
+      : progressLabel
 
   const apiStatus = React.useMemo<ServiceStatus>(() => {
     if (submitError) return 'fail'
     if (submitSuccess) return 'ok'
     return 'unknown'
   }, [submitError, submitSuccess])
+
+  if (!sessionConfig) {
+    return (
+      <WaiverWizardLayout title={t('app.title')} stepTitle={t('multiSignup.setupTitle')} statuses={{ apiStatus: 'unknown', dbStatus: 'ok' }}>
+        <SectionCard title={t('multiSignup.setupTitle')} subtitle={t('multiSignup.setupDescription')}>
+          <div className="space-y-5">
+            <div className="space-y-3">
+              <label className="flex items-center gap-3 text-sm text-brand-on-surface">
+                <input
+                  type="radio"
+                  name="signupMode"
+                  checked={modeSelection === 'self'}
+                  onChange={() => setModeSelection('self')}
+                />
+                <span>{t('multiSignup.mode.self')}</span>
+              </label>
+              <label className="flex items-center gap-3 text-sm text-brand-on-surface">
+                <input
+                  type="radio"
+                  name="signupMode"
+                  checked={modeSelection === 'other'}
+                  onChange={() => setModeSelection('other')}
+                />
+                <span>{t('multiSignup.mode.other')}</span>
+              </label>
+              <label className="flex items-center gap-3 text-sm text-brand-on-surface">
+                <input
+                  type="radio"
+                  name="signupMode"
+                  checked={modeSelection === 'self_and_others'}
+                  onChange={() => setModeSelection('self_and_others')}
+                />
+                <span>{t('multiSignup.mode.selfAndOthers')}</span>
+              </label>
+            </div>
+
+            {modeSelection !== 'self' && (
+              <div className="max-w-[240px]">
+                <label className="text-xs font-semibold uppercase tracking-[0.18em] text-brand-secondary/90">
+                  {t('multiSignup.countLabel')}
+                </label>
+                <input
+                  className="mt-2 w-full rounded-lg border border-brand-outline/60 bg-brand-surface px-3 py-2 text-sm text-brand-on-surface shadow-sm"
+                  type="number"
+                  min={modeSelection === 'self_and_others' ? 2 : 1}
+                  value={modeCount}
+                  onChange={(event) => {
+                    const parsed = Number.parseInt(event.target.value, 10)
+                    setModeCount(Number.isFinite(parsed) ? parsed : 1)
+                  }}
+                />
+                <p className="mt-1 text-xs text-brand-secondary/75">{t('multiSignup.countHint')}</p>
+              </div>
+            )}
+
+            <button
+              type="button"
+              onClick={handleStartSession}
+              className="inline-flex items-center justify-center rounded-full bg-brand-primary px-6 py-3 text-sm font-semibold uppercase tracking-[0.2em] text-white shadow-lg shadow-brand-primary/30 transition hover:bg-brand-primary/90"
+            >
+              {modeSelection === 'self' ? t('multiSignup.startSingle') : t('multiSignup.start')}
+            </button>
+          </div>
+        </SectionCard>
+      </WaiverWizardLayout>
+    )
+  }
 
   return (
     <FormProvider {...methods}>
@@ -265,6 +546,22 @@ export const WaiverPage: React.FC = () => {
                 )}
               </div>
 
+              {sessionResults.length > 1 && (
+                <div className="mt-6 rounded-xl border border-brand-outline/30 bg-brand-surface-variant/50 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-secondary">
+                    {t('multiSignup.summaryTitle')}
+                  </p>
+                  <ul className="mt-3 space-y-2 text-sm text-brand-on-surface">
+                    {sessionResults.map((item, itemIndex) => (
+                      <li key={item.waiverId} className="rounded-md border border-brand-outline/25 bg-brand-surface/70 px-3 py-2">
+                        <span className="font-semibold">{t('multiSignup.personLabel')} {itemIndex + 1}:</span>{' '}
+                        <span className="font-mono">{item.participantId}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
               {downloadError && (
                 <div
                   role="alert"
@@ -303,7 +600,22 @@ export const WaiverPage: React.FC = () => {
                 {submitError}
               </div>
             )}
-            {renderStep()}
+            {showReuseStep ? (
+              <HouseholdReuseStep
+                options={reuseOptions}
+                emergencyContactAvailable={Boolean(householdContext && hasEmergencyContactValues(householdContext.emergencyContact))}
+                onChange={setReuseOptions}
+              />
+            ) : (
+              <>
+                {prefillAppliedHint && (
+                  <div className="rounded-xl border border-brand-primary/25 bg-brand-primary/10 px-4 py-3 text-sm font-medium text-brand-primary">
+                    {prefillAppliedHint}
+                  </div>
+                )}
+                {renderStep()}
+              </>
+            )}
             {import.meta.env.DEV && (
               <div className="flex justify-end">
                 <button
@@ -320,11 +632,17 @@ export const WaiverPage: React.FC = () => {
               isLastStep={isLast}
               onBack={onBack}
               onNext={onNext}
-              disabledNext={!canAdvance}
+              disabledNext={showReuseStep ? false : !canAdvance}
               labels={{
                 back: t('nav.back'),
                 next: t('nav.next'),
-                submit: isSubmitting ? t('nav.submitting') : t('nav.submit'),
+                submit: isSubmitting
+                  ? t('nav.submitting')
+                  : showReuseStep
+                    ? t('householdReuse.continue')
+                    : isLast && hasMorePeople
+                    ? t('nav.submitNextPerson')
+                    : t('nav.submit'),
               }}
               isSubmitting={isSubmitting}
             />

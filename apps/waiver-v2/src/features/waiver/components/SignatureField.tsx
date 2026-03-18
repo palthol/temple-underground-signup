@@ -1,6 +1,7 @@
 import React from 'react'
 import SignaturePad from 'signature_pad'
 import type { PointGroup } from 'signature_pad/dist/types/signature_pad'
+import { useI18n } from '../../../shared/i18n/I18nProvider'
 
 const CANVAS_WIDTH = 640
 const CANVAS_HEIGHT = 240
@@ -19,6 +20,7 @@ type Props = {
 const EMPTY_SIGNATURE: SignatureValue = { pngDataUrl: '', vectorJson: [] }
 
 export const SignatureField: React.FC<Props> = ({ value, onChange, className }) => {
+  const { t } = useI18n()
   const canvasRef = React.useRef<HTMLCanvasElement | null>(null)
   const padRef = React.useRef<SignaturePad | null>(null)
   const syncingRef = React.useRef(false)
@@ -105,13 +107,13 @@ export const SignatureField: React.FC<Props> = ({ value, onChange, className }) 
         width={CANVAS_WIDTH}
         height={CANVAS_HEIGHT}
         className="h-48 w-full touch-none rounded-md border border-slate-300 bg-white"
-        aria-label="Signature pad"
+        aria-label={t('signature.padAriaLabel')}
       />
       <div className="mt-2 flex justify-between">
         <button type="button" onClick={clear} className="text-sm text-slate-500 hover:text-slate-700">
-          Clear signature
+          {t('signature.clear')}
         </button>
-        <span className="text-xs text-gray-500">Sign using your mouse or touch input.</span>
+        <span className="text-xs text-gray-500">{t('signature.hint')}</span>
       </div>
     </div>
   )
