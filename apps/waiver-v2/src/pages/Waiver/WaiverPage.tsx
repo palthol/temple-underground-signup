@@ -11,6 +11,7 @@ import { getStepSchema } from '../../features/waiver/schema/waiver'
 import { z } from 'zod'
 import { submitWaiver, type SubmitWaiverFieldError, type SubmitWaiverSuccess } from '../../features/waiver/api/submitWaiver'
 import { getWaiverPdf } from '../../features/waiver/api/getWaiverPdf'
+import { warmApi } from '../../features/waiver/api/client'
 import { fillSampleWaiver } from '../../features/waiver/utils/sampleWaiver'
 import { SectionCard } from '../../features/waiver/components/common/SectionCard'
 
@@ -344,6 +345,11 @@ export const WaiverPage: React.FC = () => {
       })
       return
     }
+
+    if (!isLast) {
+      void warmApi()
+    }
+
     if (isLast) {
       setIsSubmitting(true)
       try {
