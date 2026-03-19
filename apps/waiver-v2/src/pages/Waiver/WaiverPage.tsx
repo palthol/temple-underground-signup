@@ -2,7 +2,6 @@ import React from 'react'
 import { FormProvider, type FieldPath } from 'react-hook-form'
 import { useI18n } from '../../shared/i18n/I18nProvider'
 import { WaiverWizardLayout } from '../../features/waiver/components/Wizard/WaiverWizardLayout'
-import type { ServiceStatus } from '../../features/waiver/components/Wizard/WaiverWizardLayout'
 import { StepNavigation } from '../../features/waiver/components/Wizard/StepNavigation'
 import { createDefaultValues, useWaiverForm, type WaiverFormInput } from '../../features/waiver/hooks/useWaiverForm'
 import { useWaiverSteps } from '../../features/waiver/hooks/useWaiverSteps'
@@ -443,15 +442,9 @@ export const WaiverPage: React.FC = () => {
       ? `${personIndicator} • ${progressLabel}`
       : progressLabel
 
-  const apiStatus = React.useMemo<ServiceStatus>(() => {
-    if (submitError) return 'fail'
-    if (submitSuccess) return 'ok'
-    return 'unknown'
-  }, [submitError, submitSuccess])
-
   if (!sessionConfig) {
     return (
-      <WaiverWizardLayout title={t('app.title')} stepTitle={t('multiSignup.setupTitle')} statuses={{ apiStatus: 'unknown', dbStatus: 'ok' }}>
+      <WaiverWizardLayout title={t('app.title')} stepTitle={t('multiSignup.setupTitle')}>
         <SectionCard title={t('multiSignup.setupTitle')} subtitle={t('multiSignup.setupDescription')}>
           <div className="space-y-5">
             <div className="space-y-3">
@@ -518,7 +511,6 @@ export const WaiverPage: React.FC = () => {
         title={t('app.title')}
         stepTitle={stepTitle}
         stepIndicator={stepIndicator}
-        statuses={{ apiStatus, dbStatus: 'ok' }}
       >
         {submitSuccess ? (
           <div className="space-y-6">

@@ -5,8 +5,6 @@
   "wizard.summary": "Review & Submit",
   "wizard.instructions": "Complete each section with accurate information. You can edit any step before submitting.",
   "wizard.support": "Need help? Email support@templeunderground.com",
-  "status.api": "API",
-  "status.db": "DB",
   "nav.back": "Back",
   "nav.next": "Next",
   "nav.submit": "Submit",

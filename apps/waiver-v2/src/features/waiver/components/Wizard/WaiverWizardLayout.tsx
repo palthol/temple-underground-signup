@@ -1,38 +1,19 @@
 import React from 'react'
 import { useI18n } from '../../../../shared/i18n/I18nProvider'
-import { Badge } from '../common/Badge'
 import { useParallaxScroll } from '../../hooks/useParallaxScroll'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../../components/ui/select'
-
-export type ServiceStatus = 'ok' | 'fail' | 'unknown'
 
 type Props = {
   title: string
   stepTitle?: string
   stepIndicator?: string
-  statuses?: {
-    apiStatus: ServiceStatus
-    dbStatus: ServiceStatus
-  }
   children: React.ReactNode
-}
-
-const statusTone = (status: ServiceStatus) => {
-  switch (status) {
-    case 'ok':
-      return 'success' as const
-    case 'fail':
-      return 'error' as const
-    default:
-      return 'default' as const
-  }
 }
 
 export const WaiverWizardLayout: React.FC<Props> = ({
   title,
   stepTitle,
   stepIndicator,
-  statuses,
   children,
 }) => {
   const { t, locale, setLocale } = useI18n()
@@ -102,16 +83,6 @@ export const WaiverWizardLayout: React.FC<Props> = ({
                 </Select>
               </label>
 
-              {statuses && (
-                <div className="flex flex-wrap gap-3">
-                  <Badge tone={statusTone(statuses.apiStatus)}>
-                    {t('status.api')}: {statuses.apiStatus}
-                  </Badge>
-                  <Badge tone={statusTone(statuses.dbStatus)}>
-                    {t('status.db')}: {statuses.dbStatus}
-                  </Badge>
-                </div>
-              )}
             </div>
           </div>
         </header>
