@@ -3,9 +3,6 @@ import SignaturePad from 'signature_pad'
 import type { PointGroup } from 'signature_pad/dist/types/signature_pad'
 import { useI18n } from '../../../shared/i18n/I18nProvider'
 
-const CANVAS_WIDTH = 640
-const CANVAS_HEIGHT = 240
-
 export type SignatureValue = {
   pngDataUrl: string
   vectorJson: PointGroup[]
@@ -42,16 +39,27 @@ export const SignatureField: React.FC<Props> = ({ value, onChange, className }) 
     const canvas = canvasRef.current
     const pad = padRef.current
     if (!canvas || !pad) return
+    const nextWidth = Math.max(Math.floor(canvas.clientWidth), 1)
+    const nextHeight = Math.max(Math.floor(canvas.clientHeight), 1)
+    if (!nextWidth || !nextHeight) return
+
+    const currentWidth = Math.floor(canvas.width / Math.max(window.devicePixelRatio || 1, 1))
+    const currentHeight = Math.floor(canvas.height / Math.max(window.devicePixelRatio || 1, 1))
+    if (currentWidth === nextWidth && currentHeight === nextHeight) return
+
+    const snapshot = pad.toData()
     const ratio = Math.max(window.devicePixelRatio || 1, 1)
-    canvas.width = CANVAS_WIDTH * ratio
-    canvas.height = CANVAS_HEIGHT * ratio
-    canvas.style.width = `${CANVAS_WIDTH}px`
-    canvas.style.height = `${CANVAS_HEIGHT}px`
+    canvas.width = nextWidth * ratio
+    canvas.height = nextHeight * ratio
     const ctx = canvas.getContext('2d')
     if (!ctx) return
     ctx.setTransform(1, 0, 0, 1, 0, 0)
     ctx.scale(ratio, ratio)
-    if (value?.vectorJson && value.vectorJson.length) {
+    if (snapshot.length) {
+      syncingRef.current = true
+      pad.fromData(snapshot as any)
+      syncingRef.current = false
+    } else if (value?.vectorJson?.length) {
       syncingRef.current = true
       pad.fromData(value.vectorJson as any)
       syncingRef.current = false
@@ -86,7 +94,7 @@ export const SignatureField: React.FC<Props> = ({ value, onChange, className }) 
   React.useEffect(() => {
     const pad = padRef.current
     if (!pad) return
-    if (value?.vectorJson && value.vectorJson.length) {
+    if (value?.vectorJson?.length) {
       syncingRef.current = true
       pad.fromData(value.vectorJson as any)
       syncingRef.current = false
@@ -97,15 +105,24 @@ export const SignatureField: React.FC<Props> = ({ value, onChange, className }) 
 
   React.useEffect(() => {
     window.addEventListener('resize', resizeCanvas)
-    return () => window.removeEventListener('resize', resizeCanvas)
+    const canvas = canvasRef.current
+    const observed = canvas?.parentElement
+    if (!observed || typeof ResizeObserver === 'undefined') {
+      return () => window.removeEventListener('resize', resizeCanvas)
+    }
+
+    const observer = new ResizeObserver(() => resizeCanvas())
+    observer.observe(observed)
+    return () => {
+      window.removeEventListener('resize', resizeCanvas)
+      observer.disconnect()
+    }
   }, [resizeCanvas])
 
   return (
     <div className={className}>
       <canvas
         ref={canvasRef}
-        width={CANVAS_WIDTH}
-        height={CANVAS_HEIGHT}
         className="h-48 w-full touch-none rounded-md border border-slate-300 bg-white"
         aria-label={t('signature.padAriaLabel')}
       />

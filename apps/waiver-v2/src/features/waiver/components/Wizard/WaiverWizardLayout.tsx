@@ -2,6 +2,7 @@ import React from 'react'
 import { useI18n } from '../../../../shared/i18n/I18nProvider'
 import { Badge } from '../common/Badge'
 import { useParallaxScroll } from '../../hooks/useParallaxScroll'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../../components/ui/select'
 
 export type ServiceStatus = 'ok' | 'fail' | 'unknown'
 
@@ -36,6 +37,7 @@ export const WaiverWizardLayout: React.FC<Props> = ({
 }) => {
   const { t, locale, setLocale } = useI18n()
   const parallaxOffset = useParallaxScroll(0.15)
+  const localeCode = locale === 'es' ? 'ES' : 'ENG'
 
   return (
     <div className="min-h-screen bg-brand-surface-variant/80 py-10">
@@ -73,14 +75,31 @@ export const WaiverWizardLayout: React.FC<Props> = ({
             <div className="flex flex-col items-start gap-4 lg:items-end">
               <label className="flex items-center gap-3 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium tracking-wide text-white">
                 <span>{t('wizard.language')}</span>
-                <select
+                <Select
                   value={locale}
-                  onChange={(e) => setLocale(e.target.value as any)}
-                  className="rounded-full border-none bg-transparent text-sm font-semibold uppercase tracking-[0.2em] text-white focus:outline-none focus:ring-2 focus:ring-white/40"
+                  onValueChange={(value) => setLocale(value as 'en' | 'es')}
                 >
-                  <option value="en">English</option>
-                  <option value="es">Español</option>
-                </select>
+                  <SelectTrigger className="h-9 w-[96px] border-none bg-transparent px-2.5 text-white shadow-none">
+                    <svg
+                      aria-hidden="true"
+                      viewBox="0 0 24 24"
+                      className="h-4 w-4 text-white/90"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.8"
+                    >
+                      <circle cx="12" cy="12" r="9" />
+                      <path d="M3 12h18" />
+                      <path d="M12 3a13 13 0 0 1 0 18" />
+                      <path d="M12 3a13 13 0 0 0 0 18" />
+                    </svg>
+                    <SelectValue aria-label={localeCode}>{localeCode}</SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="en">English</SelectItem>
+                    <SelectItem value="es">Español</SelectItem>
+                  </SelectContent>
+                </Select>
               </label>
 
               {statuses && (

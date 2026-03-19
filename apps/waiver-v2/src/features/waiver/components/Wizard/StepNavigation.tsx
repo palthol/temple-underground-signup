@@ -1,5 +1,6 @@
 import React from 'react'
 import { useI18n } from '../../../../shared/i18n/I18nProvider'
+import { Button } from '../../../../components/ui/button'
 
 type Props = {
   disabledNext?: boolean
@@ -30,23 +31,13 @@ export const StepNavigation: React.FC<Props> = ({
 
   return (
     <div className="mt-8 flex flex-col-reverse gap-3 md:flex-row md:items-center md:justify-between">
-      <button
-        type="button"
-        onClick={onBack}
-        disabled={isFirstStep || !!isSubmitting}
-        className="inline-flex items-center justify-center rounded-full border border-brand-outline/60 bg-brand-surface px-5 py-2 text-sm font-semibold uppercase tracking-[0.15em] text-brand-secondary transition hover:border-brand-primary hover:text-brand-primary disabled:cursor-not-allowed disabled:opacity-40"
-      >
+      <Button type="button" variant="outline" size="sm" onClick={onBack} disabled={isFirstStep || !!isSubmitting}>
         {t('nav.back')}
-      </button>
+      </Button>
 
-      <button
-        type="button"
-        onClick={onNext}
-        disabled={!!disabledNext || !!isSubmitting}
-        className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-slate-700 via-slate-800 to-blue-900 px-6 py-3 text-sm font-semibold uppercase tracking-[0.2em] text-white shadow-lg shadow-slate-900/30 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
-      >
+      <Button type="button" variant="gradient" onClick={onNext} disabled={!!disabledNext || !!isSubmitting}>
         {nextLabel}
-      </button>
+      </Button>
     </div>
   )
 }

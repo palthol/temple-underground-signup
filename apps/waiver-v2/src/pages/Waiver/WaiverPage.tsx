@@ -14,6 +14,8 @@ import { getWaiverPdf } from '../../features/waiver/api/getWaiverPdf'
 import { warmApi } from '../../features/waiver/api/client'
 import { fillSampleWaiver } from '../../features/waiver/utils/sampleWaiver'
 import { SectionCard } from '../../features/waiver/components/common/SectionCard'
+import { Button } from '../../components/ui/button'
+import { Input } from '../../components/ui/input'
 
 const stepTitleKeys = [
   'personalInfo.title',
@@ -487,8 +489,8 @@ export const WaiverPage: React.FC = () => {
                 <label className="text-xs font-semibold uppercase tracking-[0.18em] text-brand-secondary/90">
                   {t('multiSignup.countLabel')}
                 </label>
-                <input
-                  className="mt-2 w-full rounded-lg border border-brand-outline/60 bg-brand-surface px-3 py-2 text-sm text-brand-on-surface shadow-sm"
+                <Input
+                  className="mt-2"
                   type="number"
                   min={modeSelection === 'self_and_others' ? 2 : 1}
                   value={modeCount}
@@ -501,13 +503,9 @@ export const WaiverPage: React.FC = () => {
               </div>
             )}
 
-            <button
-              type="button"
-              onClick={handleStartSession}
-              className="inline-flex items-center justify-center rounded-full bg-brand-primary px-6 py-3 text-sm font-semibold uppercase tracking-[0.2em] text-white shadow-lg shadow-brand-primary/30 transition hover:bg-brand-primary/90"
-            >
+            <Button type="button" onClick={handleStartSession}>
               {modeSelection === 'self' ? t('multiSignup.startSingle') : t('multiSignup.start')}
-            </button>
+            </Button>
           </div>
         </SectionCard>
       </WaiverWizardLayout>
@@ -578,21 +576,20 @@ export const WaiverPage: React.FC = () => {
               )}
 
               <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-                <button
+                <Button
                   type="button"
                   onClick={handleDownloadPdf}
                   disabled={isDownloading}
-                  className="inline-flex items-center justify-center rounded-full bg-brand-primary px-6 py-3 text-sm font-semibold uppercase tracking-[0.2em] text-white shadow-lg shadow-brand-primary/30 transition hover:bg-brand-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {isDownloading ? t('submission.actions.downloading') : t('submission.actions.downloadPdf')}
-                </button>
-                <button
+                </Button>
+                <Button
                   type="button"
                   onClick={handleStartOver}
-                  className="inline-flex items-center justify-center rounded-full border border-brand-outline/50 bg-brand-surface px-6 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-brand-secondary transition hover:border-brand-primary hover:text-brand-primary"
+                  variant="outline"
                 >
                   {t('submission.actions.new')}
-                </button>
+                </Button>
               </div>
             </SectionCard>
           </div>
@@ -624,13 +621,14 @@ export const WaiverPage: React.FC = () => {
             )}
             {import.meta.env.DEV && (
               <div className="flex justify-end">
-                <button
+                <Button
                   type="button"
                   onClick={handleFillSample}
-                  className="inline-flex items-center justify-center rounded-full border border-brand-outline/50 bg-brand-surface px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-brand-secondary transition hover:border-brand-primary hover:text-brand-primary"
+                  variant="outline"
+                  size="sm"
                 >
                   Fill with sample data
-                </button>
+                </Button>
               </div>
             )}
             <StepNavigation
