@@ -6,6 +6,9 @@ import crypto from 'node:crypto';
 import { createClient } from '@supabase/supabase-js';
 import { createWaiverPdfRouter } from './routes/waivers/pdf.js';
 import { createOrBindParticipantAccount } from './services/accounts/createOrBindParticipantAccount.js';
+import { registerAdminBillingRoutes } from './routes/admin/billing.js';
+import { registerAdminParticipantRoutes } from './routes/admin/participants.js';
+import { registerAdminReportingRoutes } from './routes/admin/reporting.js';
 
 const app = express();
 // CORS: allow configured origin or all in dev
@@ -440,6 +443,13 @@ app.use(
     requireAuth: requireAdmin,
   }),
 );
+
+const adminBillingRouter = express.Router();
+adminBillingRouter.use(requireAdmin);
+registerAdminBillingRoutes(adminBillingRouter, { supabase });
+registerAdminParticipantRoutes(adminBillingRouter, { supabase });
+registerAdminReportingRoutes(adminBillingRouter, { supabase });
+app.use('/api/admin', adminBillingRouter);
 
 app.listen(PORT, () => {
   console.log(`API listening on :${PORT}`);

@@ -1,3 +1,29 @@
+-- 0003_security_hardening.sql
+-- Consolidated security and optimization hardening from:
+--   0007_view_security_invoker.sql
+--   0008_function_search_path.sql
+--   0009_index_and_query_optimizations.sql
+
+-- ============================================================================
+-- Source: 0007_view_security_invoker.sql
+-- ============================================================================
+-- 0007_view_security_invoker.sql
+-- Security invoker is set directly in each CREATE OR REPLACE VIEW statement.
+
+-- ============================================================================
+-- Source: 0008_function_search_path.sql
+-- ============================================================================
+-- 0008_function_search_path.sql
+-- Fix "Function Search Path Mutable" warnings: pin search_path so functions
+-- always resolve tables/views in public, not caller-controlled schemas.
+
+alter function public.update_updated_at_column() set search_path = public;
+alter function public.generate_monthly_charges() set search_path = public;
+alter function public.can_attend_group_session(uuid, text) set search_path = public;
+
+-- ============================================================================
+-- Source: 0009_index_and_query_optimizations.sql
+-- ============================================================================
 -- 0009_index_and_query_optimizations.sql
 -- Indexes and small tweaks to speed up common access patterns and views.
 
