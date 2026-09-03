@@ -1,6 +1,7 @@
 # API capability audit — notifications, finance, scheduling
 
-**Date:** 2026-06-01 (updated; original audit 2026-05-29)  
+**Date:** 2026-09-03 (updated; original audit 2026-05-29)
+
 **Scope:** `services/api` (deployed Express backend) vs `supabase/migrations/` (schema source of truth) vs front-ends (`admin/apps/receipts`, `admin/apps/dashboard`, `marketing/TU-web`, `TU-Signup`).  
 **Companion docs:** [admin-api.md](./admin-api.md) (route contracts), [api-schema-audit.md](./api-schema-audit.md) (live DB alignment), [finance-subsystem-design.md](./finance-subsystem-design.md), [receipts-app.md](./receipts-app.md), [v1-v2-application-map.md](./v1-v2-application-map.md).
 
@@ -14,8 +15,10 @@
 | **Finance / receipts** | Full billing + receipts + personal log + expenses (through **0019** on live) | Rich `/api/admin/billing/*` + reporting | No payment processor; no scheduled invoice reminders in API yet | `admin/apps/receipts` — personal log + formal billing **ready** (0017–0019 applied) |
 | **Scheduling** | `schedule_templates`, `sessions`, `attendance_records`, entitlements | **Session + attendance CRUD** via `/api/admin/scheduling/*` (Tier 1, PR #11) | Reporting views + entitlement check on attendance; billing RPC from attendance | Dashboard still reads `sessions` via **direct Supabase**; marketing schedule is **static config** |
 
-**Schema sync:** Production includes migrations **0017–0020** (confirmed 2026-06-01 via
-`list_migrations`). Repo and live DB are fully aligned through **0020**; next work is
+**Schema sync:** Production includes migrations **0017–0020** and the marketing-lead name
+change (confirmed 2026-09-03 via `list_migrations`). That last change is versioned
+`20260608191715` live and `0021` in the repo; reconcile the identifier before another
+push. Next work is
 **smoke-testing** finance, scheduling, and subscription endpoints. See
 [api-schema-audit.md](./api-schema-audit.md).
 
@@ -226,11 +229,13 @@ Full request/response contracts: [admin-api.md](./admin-api.md) § Scheduling.
 | App | Scheduling behavior |
 |-----|---------------------|
 | `marketing/TU-web` | **Static** schedule in `site.ts` — not DB-backed |
-| `admin/apps/dashboard` | **Read-only** `sessions` list via Supabase client (`SessionsPage.tsx`) — could migrate to scheduling API |
+| `admin/apps/dashboard` | Active scheduling console uses the admin API. An unreachable legacy `SessionsPage.tsx` still reads Supabase directly. |
 | `TU-Signup` | Creates **participants** only (via API submit) |
 | `admin/apps/receipts` | Billing only; can charge **from** attendance if `attendance_record_id` exists |
 
-**Conclusion:** Scheduling is **schema-first with Tier 1 write APIs in place**. Remaining work is operator UI wiring and template/batch generation — not core session CRUD.
+**Conclusion:** Scheduling has schema, Tier 1 write APIs, and active dashboard controls.
+Remaining work is production-safe smoke testing, the consolidated Today workflow, and
+template/batch generation—not core session CRUD.
 
 ---
 

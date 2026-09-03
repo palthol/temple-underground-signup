@@ -5,6 +5,13 @@ source of truth for `services/api` (Express, JavaScript) and the Supabase schema
 (`supabase/migrations/`). The deployed service runs from here — treat the database as
 **live production data**.
 
+Also read the repository control documents before starting work:
+
+- `docs/current-state.md`
+- `docs/target-state.md`
+- `work-queue/README.md`
+- `docs/reviewer-guide.md`
+
 npm-workspaces monorepo. Node >= 22, npm >= 10.
 
 ```
@@ -55,8 +62,9 @@ cd TU-web && npm run dev
 ## Database workflow (read before changing schema)
 
 - The schema lives in `supabase/migrations/NNNN_*.sql`, applied in numeric order.
-- **Migration sync:** live project is applied through **`0019`** (including
-  `personal_finance_entries`, private-schema grants, `charge_discounts`). Before new
+- **Migration sync:** live project includes **`0001`–`0020`** plus the marketing-lead
+  first/last-name migration. The repo names that last file `0021`, while production
+  records version `20260608191715`; reconcile that history before the next push. Before new
   schema work, confirm in Supabase Dashboard → Database → Migrations or `list_migrations`.
   See `docs/api-schema-audit.md` and `docs/api-capability-audit.md`.
 - To add schema: write a new numbered migration, apply it (`supabase db push` or the

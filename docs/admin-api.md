@@ -2,7 +2,9 @@
 
 All admin routes require the **`x-admin-key`** header matching **`ADMIN_API_KEY`** on the API server. Use HTTPS in production; never expose the admin key in public frontends (the `admin/apps/dashboard` merge UI is for trusted operators only).
 
-The standalone waiver viewer can optionally set `VITE_ADMIN_API_KEY` to that same `ADMIN_API_KEY` so you do not type it on each page load. This is convenient but browser-visible; only use it when the viewer deployment is private/trusted.
+The standalone waiver viewer uses Cloudflare Access and does not consume an admin key.
+The active dashboard and receipts app require the operator to enter the admin key at
+runtime; they do not read `VITE_ADMIN_API_KEY`.
 
 **Base URL:** same host as `services/api` (e.g. `http://localhost:3001`).
 

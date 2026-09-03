@@ -1,5 +1,9 @@
 # Infrastructure additions checklist
 
+> **Status note (2026-09-03):** This checklist predates the completed scheduling and
+> subscription work. The corrected baseline below is authoritative; new execution should
+> be tracked in the workspace `work-queue/README.md`.
+
 **Purpose:** Turn the existing Postgres schema and admin API into daily staff workflows — without ad-hoc SQL.  
 **Companion docs:** [api-capability-audit.md](./api-capability-audit.md), [admin-api.md](./admin-api.md), [api-schema-audit.md](./api-schema-audit.md), [finance-subsystem-design.md](./finance-subsystem-design.md).
 
@@ -29,9 +33,9 @@ Use this as “done” context before starting new work.
 | Area | Status |
 |------|--------|
 | Billing writes (payments, refunds, discounts, personal log, per-class from attendance) | API exists — see [admin-api.md](./admin-api.md) |
-| Subscription **upgrade** / per-class → monthly | RPC + API exist; **subscription create** does not |
+| Subscription create, upgrade, and per-class → monthly | RPC + API + dashboard controls exist; production use not yet proven |
 | Scheduling **reads** | `view_ops_today_sessions` + reporting slug `today-sessions` |
-| Scheduling **writes** | **Not in API**; dashboard reads `sessions` via Supabase directly |
+| Scheduling **writes** | Session and attendance API + active dashboard controls exist; templates/batch generation do not |
 | Discord notifications | Routes exist; **no in-repo cron** calls them yet |
 | Waiver → participant | `POST /api/waivers/submit` |
 | `generate_monthly_charges()` | DB function exists; must be **scheduled or called manually** |
@@ -55,39 +59,41 @@ Apply these steps for **each** feature below, not only once at the end.
 
 ## Tier 1 — Unlock daily operations
 
-### 1.1 Scheduling admin API (sessions + attendance)
+### 1.1 Scheduling admin API (sessions + attendance) — implemented, smoke test pending
 
 **Goal:** Staff can create sessions and mark attendance without SQL or raw Supabase from the browser.
 
 | Step | Schema | API | Jobs | UI | Verify |
 |------|--------|-----|------|-----|--------|
-| Design routes | — | — | — | — | [ ] Align names with [api-capability-audit.md § Phase 2](./api-capability-audit.md) |
-| Create session | `sessions` (exists) | `POST /api/admin/scheduling/sessions` | — | — | [ ] Returns session id; validates times/label |
-| Update / cancel session | `sessions` | `PATCH .../sessions/:id` | — | — | [ ] Cancel does not delete attendance history inappropriately |
-| List / filter sessions | views optional | `GET .../scheduling/sessions` or reuse `today-sessions` for day scope | — | — | [ ] Date range + label filters |
-| Upsert attendance | `attendance_records` | `POST .../sessions/:id/attendance` | — | — | [ ] Idempotent per participant+session; status enum validated |
+| Design routes | — | Complete | — | Active dashboard | [x] Contract documented |
+| Create session | `sessions` (exists) | `POST /api/admin/scheduling/sessions` | — | Active dashboard | [ ] Production-safe smoke test |
+| Update / cancel session | `sessions` | `PATCH .../sessions/:id` | — | Active dashboard | [ ] Production-safe smoke test |
+| List / filter sessions | views optional | `GET .../scheduling/sessions` | — | Active dashboard | [ ] Production-safe smoke test |
+| Upsert attendance | `attendance_records` | `POST .../sessions/:id/attendance` | — | Active dashboard | [ ] Production-safe smoke test |
 | Optional: templates | `schedule_templates` | `POST .../scheduling/templates` | — | — | [ ] |
 | Optional: generate from templates | RPC `generate_sessions` (new) | `POST .../scheduling/generate-sessions` | Cron later | — | [ ] Date range expansion tested |
 | Entitlement guard | `can_attend_group_session` (exists) | Call RPC or mirror rules in route before `present` | — | — | [ ] Block or warn when not entitled (product decision) |
 
 **UI follow-up (same tier):**
 
-- [ ] Stop writing `sessions` / `attendance_records` from dashboard Supabase client; call admin API instead.
+- [x] Active dashboard scheduling controls call the admin API. An unreachable legacy
+      `SessionsPage.tsx` still reads Supabase directly and is tracked by workspace task
+      `ARCH-001`.
 - [ ] Wire `today-sessions` view on a single **Today** page with actions (check-in, add walk-in).
 
 **Definition of done:** Operator can run a class night end-to-end: session exists → roster checked in → `view_ops_today_sessions` reflects counts → optional `charge-from-attendance` still works when `attendance_record_id` exists.
 
 ---
 
-### 1.2 Subscription create API (participant + plan + dates)
+### 1.2 Subscription create API (participant + plan + dates) — implemented, smoke test pending
 
 **Goal:** Enroll a member on a plan without SQL; unlock billing and attendance rules.
 
 | Step | Schema | API | Jobs | UI | Verify |
 |------|--------|-----|------|-----|--------|
 | Design enrollment contract | `subscriptions`, `plan_definitions`, `accounts`, `account_members` | — | — | — | [ ] Fields: `participant_id`, `plan_definition_id`, `starts_at`, `ends_at` optional, `account_id` or create/bind account |
-| RPC (recommended) | `create_subscription(...)` new migration | Wrap in route | — | — | [ ] One transaction: account link if needed, subscription row, optional initial charge |
-| Admin route | — | `POST /api/admin/billing/subscriptions` (name TBD) | — | — | [ ] Validates plan active, date overlap rules, single active plan per product rules |
+| RPC | `create_subscription(...)` in migration `0020` | Wrapped | — | Active dashboard | [ ] Production-safe smoke test |
+| Admin route | — | `POST /api/admin/billing/subscriptions` | — | Active dashboard | [ ] Production-safe smoke test |
 | Initial charge policy | `charges` | Same RPC or separate flag | — | — | [ ] Document: create first monthly charge or defer to `generate_monthly_charges` |
 | Event ledger | triggers on `subscriptions` | — | — | — | [ ] Enrollment appears in ledger |
 

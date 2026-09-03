@@ -1,6 +1,7 @@
 # API ↔ Supabase schema audit (live verification)
 
-**Date:** 2026-06-01 (updated; original audit 2026-05-29)  
+**Date:** 2026-09-03 (updated; original audit 2026-05-29)
+
 **Product map:** [api-capability-audit.md](./api-capability-audit.md) (notifications, finance, scheduling).  
 **Project:** Temple Underground — Supabase `jhxzecxkccqlgyazhsnb` (production, live traffic)
 **Audited API:** `services/api` (this repo — the deployed admin/waiver API)
@@ -19,9 +20,10 @@ The API code is **structurally aligned** with the database: every RPC it calls, 
 view it reads, and every column it writes exists in the live schema with matching names,
 types, and check-constraint vocabularies.
 
-**All repo migrations are applied on production.** `list_migrations` on the live project
-returns `0001`–`0020`, matching every file in `supabase/migrations/`. There is **no
-migration drift** between repo and live DB as of 2026-06-01.
+All expected schema changes are present in production. `list_migrations` returns
+`0001`–`0020` plus `20260608191715_marketing_leads_first_last_name`. The repository holds
+the same last change as `0021_marketing_leads_first_last_name.sql`; reconcile that version
+identifier before the next push rather than assuming migration history is identical.
 
 Remaining work is **operational smoke-testing** (finance, scheduling, subscriptions) and
 **engineering hardening** (non-transactional write paths — see §3).
@@ -30,8 +32,9 @@ Remaining work is **operational smoke-testing** (finance, scheduling, subscripti
 
 ## 1. Migration status
 
-`list_migrations` on the live project returns **`0001`–`0020`**. The repo's
-`supabase/migrations/` folder contains **20 migrations** — all applied on production.
+`list_migrations` on the live project returns **`0001`–`0020`** plus timestamped migration
+**`20260608191715`**. The repo's `supabase/migrations/` folder contains **21 migrations**;
+the final file is numbered `0021` locally but represents the timestamped live change.
 
 | Migration | Creates | API code that depends on it |
 | --- | --- | --- |
@@ -40,7 +43,7 @@ Remaining work is **operational smoke-testing** (finance, scheduling, subscripti
 | `0019_charge_discounts.sql` | table `charge_discounts`, trigger `charge_discounts_set_applied_amount()`, discount-aware rewrite of `view_charge_net`, total-guard triggers, `charges.amount_cents` lock trigger | `billing.js`: `GET/POST /billing/charge-discounts` (and the discount line in the receipts "Formal billing" tab) |
 | `0020_tier1_subscription_and_session_cancel.sql` | `sessions.cancelled_at`, RPC `create_subscription(...)`, updated `view_ops_today_sessions` | `billing.js`: `POST /billing/subscriptions`; `scheduling.js`: session list/get/create/patch + attendance upsert |
 
-**Verification (2026-06-01):**
+**Verification (2026-09-03):**
 
 ```sql
 select table_name from information_schema.tables
@@ -173,25 +176,26 @@ All 19 reporting-view slugs were confirmed present in the live DB:
 
 ---
 
-## 4. Data integrity snapshot (live, 2026-06-01)
+## 4. Production usage snapshot (live, 2026-09-03)
 
 Counts confirm **live production traffic**. Integrity checks were clean:
 
 | Check | Result |
 | --- | --- |
-| participants | 9 |
+| participants | 32 |
 | participants merged (`merged_into_participant_id` set) | 0 |
 | participants with no `account_members` link | **0** (every participant is tethered to an account) |
-| waivers | 12 |
+| waivers | 36 |
 | waivers with null `participant_id` | **0** |
 | waivers with no matching `audit_trails` row | **0** |
 | audit_trails | 12 |
 | charges / payments / receipts | 0 / 0 / 0 (formal billing not yet exercised) |
-| event_ledger | 31 (append-only, growing) |
+| subscriptions / sessions / attendance | 0 / 0 / 0 |
+| personal finance / operating expenses / marketing leads | 0 / 0 / 0 |
 
-No orphaned, dangling, or merged-but-unresolved rows were found. The
-`createOrBindParticipantAccount` tether in the waiver path is doing its job (0 unlinked
-participants).
+The 2026-09-03 refresh checked usage counts and migration/schema presence; it did not rerun
+every integrity query from the 2026-06-01 audit. See the workspace
+`docs/current-state.md` for the current verification boundary.
 
 ---
 

@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "repository": "palthol/TU-api",
+  "updated": "2026-09-03",
+  "production_write_default": false,
+  "tasks": [
+    {"id":"API-DOC-001","lane":"docs","status":"done","depends_on":[]},
+    {"id":"API-DEV-001","lane":"tooling","status":"ready","depends_on":["API-DOC-001"]},
+    {"id":"API-SEC-001","lane":"security","status":"blocked","depends_on":["API-DEV-001"]},
+    {"id":"API-TEST-001","lane":"tests","status":"blocked","depends_on":["API-DEV-001"]},
+    {"id":"API-TEST-002","lane":"tests","status":"blocked","depends_on":["API-DEV-001"]},
+    {"id":"API-OPS-001","lane":"deployment","status":"ready","depends_on":["API-DOC-001"]},
+    {"id":"API-GATE-001","lane":"validation","status":"blocked","depends_on":["API-DEV-001","API-TEST-001","API-TEST-002","API-OPS-001"]},
+    {"id":"API-VAL-001","lane":"validation","status":"blocked","depends_on":["API-GATE-001"]},
+    {"id":"API-VAL-002","lane":"validation","status":"blocked","depends_on":["API-GATE-001"]},
+    {"id":"API-HARD-001","lane":"backend","status":"blocked","depends_on":["API-TEST-001","API-VAL-001"]},
+    {"id":"API-HARD-002","lane":"backend","status":"blocked","depends_on":["API-GATE-001"]},
+    {"id":"API-SCHED-001","lane":"backend","status":"blocked","depends_on":["API-TEST-002","API-VAL-002"]},
+    {"id":"API-AUTO-001","lane":"automation","status":"blocked","depends_on":["API-OPS-001","API-VAL-001"]},
+    {"id":"API-AUTO-002","lane":"automation","status":"blocked","depends_on":["API-OPS-001","API-VAL-001"]},
+    {"id":"API-AUTH-001","lane":"security","status":"blocked","depends_on":["API-OPS-001"]},
+    {"id":"API-PAY-001","lane":"integrations","status":"blocked","depends_on":["API-HARD-001","API-AUTH-001"]}
+  ]
+}
