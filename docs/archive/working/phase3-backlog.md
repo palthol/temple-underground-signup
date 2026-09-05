@@ -1,6 +1,10 @@
 # Project Status and Next Work
 
-This document is the current handoff note after Event Ledger Phase 1, Phase 2 high-impact DB views, and Phase 3 analytics DB scaffold.
+> **Historical handoff** after Event Ledger Phase 1 and Phase 2/3 DB views.
+> Live task tracking is [`work-queue/README.md`](../../../work-queue/README.md).
+> Live status is [`current-state.md`](../../current-state.md).
+
+This document is a handoff note from that phase. Do not treat the progress percentages or “next work focus” lists as current.
 
 ## Estimated progress snapshot
 

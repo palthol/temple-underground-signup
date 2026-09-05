@@ -38,8 +38,9 @@ A single-operator guide for **building**, **maintaining**, and **using** this ap
 - **API** — In `services/api`, add a `.env` with at least:
   - `SUPABASE_URL`
   - `SUPABASE_SERVICE_ROLE_KEY` (for server-side PDF/DB access)
-  - Optional notifications: `DISCORD_WEBHOOK_URL` and/or `SLACK_WEBHOOK_URL`
-- **Waiver viewer app** — Set `VITE_API_BASE_URL` if the API is not at `http://localhost:3001`. For convenience on a private/trusted deployment, set `VITE_ADMIN_API_KEY` to the same value as the API service's `ADMIN_API_KEY`; because Vite exposes `VITE_*` values in the browser bundle, only do this when access to the viewer itself is restricted.
+  - `ADMIN_API_KEY` (required for `/api/admin/*` and the on-demand PDF route)
+  - Optional: `CRON_SECRET`, `ALLOWED_ORIGIN`, `DISCORD_WEBHOOK_URL`, `SLACK_WEBHOOK_URL`
+- **Waiver viewer app** — Set `VITE_API_BASE_URL` if the API is not at `http://localhost:3001`. The viewer uses Cloudflare Access and must not receive `VITE_ADMIN_API_KEY`.
 
 Keep `.env` out of git (already in `.gitignore`).
 
@@ -59,16 +60,23 @@ From the project root (or wherever you run Supabase CLI):
 npx supabase db push
 ```
 
-Or run the SQL files in order (0001 through 0006) in the Supabase Dashboard → SQL Editor.
+Or run the SQL files in **numeric order** (`0001` through `0021`) in the Supabase Dashboard → SQL Editor. Prefer `npm run supabase:push` when the CLI project is linked.
 
-Migrations do the following:
+Repo files vs live history: production records `0001`–`0020` plus timestamped `20260608191715` for the same change as repo file `0021_marketing_leads_first_last_name.sql`. Reconcile that identifier before the next push. See [api-schema-audit.md](./api-schema-audit.md).
 
-- **0001** — Participants, waivers, audit_trails + pgcrypto
-- **0002** — Emergency contacts, waiver medical histories, waiver column
-- **0003** — View `view_waiver_documents`
-- **0004** — Gym schema (accounts, plans, subscriptions, billing, sessions, attendance, usage, overrides) + triggers
-- **0005** — `generate_monthly_charges()`, view `participant_entitlement_status`, `can_attend_group_session()`
-- **0006** — RLS: admin table, `private.is_admin()`, policies so only admins (and service_role) can access tables
+What the numbered files do:
+
+- **0001** — Foundation: participants, waivers, accounts, plans, subscriptions, charges, payments, sessions, attendance, RLS, `app_admin`
+- **0002** — Affiliations, `generate_monthly_charges()`, entitlement helpers
+- **0003** — Security hardening (`search_path`, grants)
+- **0004** — Reporting views (`view_waiver_documents`, payment board, orphan waivers, …)
+- **0005** — `charge_adjustments`
+- **0006** — Refunds, participant merge, subscription upgrade RPCs
+- **0007**–**0009** — Entitlement/merge grants, pay-per-class RPCs, conversion policy
+- **0010**–**0013** — Event ledger + Phase 2/3 ops/analytics views + primary KPI summary
+- **0014**–**0019** — Receipts, marketing leads, expenses, personal finance, discounts
+- **0020** — `create_subscription` RPC, `sessions.cancelled_at`
+- **0021** — `marketing_leads` first/last name columns
 
 ### 2.4 Make yourself admin
 
@@ -84,7 +92,7 @@ select id from auth.users where email = 'your@email.com';
 
 Replace `your@email.com` with the address you use to sign in. From then on, that user has full access to all tables when using the **anon** or **authenticated** key (e.g. from the **dashboard** app or waiver app).
 
-**Order of operations:** You can create the Auth user before or after running migrations. What matters is that before signing into the dashboard, (1) migrations 0001–0006 have been applied, and (2) your auth user’s id is in `app_admin`.
+**Order of operations:** You can create the Auth user before or after running migrations. What matters is that before signing into the dashboard, (1) current migrations through **0021** have been applied, and (2) your auth user’s id is in `app_admin`.
 
 ### 2.5 Wiping the DB and starting fresh
 
@@ -92,7 +100,7 @@ Yes — you can wipe the database and start over for testing.
 
 - **Supabase hosted (Dashboard):**  
   **Project Settings** → **General** → **Reset database**. This deletes all data and all Auth users, and clears applied migrations. After reset:
-  1. Run migrations again (SQL Editor: run 0001 through 0006 in order, or use `npx supabase db push` if the project is linked).
+  1. Run migrations again (SQL Editor: run `0001` through `0021` in order, or use `npm run supabase:push` if the project is linked).
   2. Create a new user under **Authentication** → **Users** (e.g. Add user → email + password).
   3. In **SQL Editor**, run:  
      `insert into public.app_admin (id) select id from auth.users where email = 'your@email.com';`
@@ -145,6 +153,8 @@ Start the API from this repo (`npm run dev`) and the waiver app from `TU-Signup`
 
 Conceptually: **accounts** pay; **participants** consume. **Plans** define what’s offered; **subscriptions** attach a participant to a plan under an account. **Charges** are what’s owed; **payments** are what’s received; **payment_allocations** link payments to charges.
 
+Preferred operator path is the **admin API** ([admin-api.md](./admin-api.md)): scheduling, subscription create, record-payment, discounts, and reporting views. Direct SQL still works for catalog setup (`plan_definitions`) and one-off repairs.
+
 - **Plans** — Insert into `plan_definitions` (name, plan_category, billing_cadence, price_cents, etc.). Then add rows to `plan_entitlements` (e.g. group sessions or private minutes, limit_type, quantity, reset_rule like `calendar_week`).
 - **Accounts** — One row per payer (family or individual). Optionally set primary_contact_*, notes.
 - **Linking participants to accounts** — Insert into `account_members` (account_id, participant_id, role: member | payer | guardian).
@@ -167,7 +177,7 @@ Conceptually: **accounts** pay; **participants** consume. **Plans** define what�
 
 ### 5.1 Adding or changing the database
 
-- Add a **new migration** in `supabase/migrations` with the next number (e.g. `0007_my_change.sql`). Do not edit or reorder migrations that have already run.
+- Add a **new migration** in `supabase/migrations` with the next unused number (currently after `0021`). Do not edit or reorder migrations that have already run.
 - Apply: `npx supabase db push` or run the new file in SQL Editor.
 
 ### 5.2 Monthly charge generation
@@ -238,4 +248,4 @@ select can_attend_group_session('PARTICIPANT_UUID', null);
 
 ---
 
-You can extend this doc as you add an admin UI, more roles, or new workflows.
+You can extend this doc as you add roles, schedulers, or new workflows. Operator UIs live in the `admin`, `TU-Signup`, and `marketing` sibling repos.

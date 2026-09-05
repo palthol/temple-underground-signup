@@ -1,12 +1,15 @@
 # Participants/Waivers Validation Results
 
+> **Historical validation run** (2026-03-24). For current production counts see
+> [current-state.md](../../current-state.md).
+
 Validation run target: linked Supabase database  
 Date: 2026-03-24
 
 ## Artifacts
 
-- `docs/(working)/participants-waivers-runtime-validation.sql`
-- `docs/(working)/participants-waivers-validation-summary.sql`
+- `docs/archive/working/participants-waivers-runtime-validation.sql`
+- `docs/archive/working/participants-waivers-validation-summary.sql`
 
 ## Summary Outcome
 

@@ -1,5 +1,9 @@
 # Operations Table Process Map
 
+> **Historical process map.** Use [database-overview.md](../../database-overview.md) and
+> [admin-api.md](../../admin-api.md) for current tables and routes. This file is kept as
+> intake/billing vocabulary, not as the schema source of truth.
+
 This document maps database tables to operational processes so intake, billing, and attendance flows are clear and repeatable.
 
 ---

@@ -5,12 +5,31 @@ source of truth for `services/api` (Express, JavaScript) and the Supabase schema
 (`supabase/migrations/`). The deployed service runs from here — treat the database as
 **live production data**.
 
+Also read the repository control documents before starting work:
+
+- `docs/README.md`
+- `docs/current-state.md`
+- `docs/target-state.md`
+- `work-queue/README.md`
+- `docs/reviewer-guide.md`
+
+## Taking a task
+
+1. Read `work-queue/README.md`. Pick one `ready` task from `work-queue/queue.json`.
+2. Follow `work-queue/tasks/<ID>.md` only.
+3. Create `work-queue/claims/<ID>.md` from the template. If it already exists, stop.
+4. Branch from `develop` as `agent/<ID>-short-slug`.
+5. Production DB writes are forbidden unless the task file says otherwise.
+6. Stay in `allowed_paths` plus the shared queue files in the README.
+7. Verify with the commands in the brief; mark the task `done` in `queue.json` and the README table.
+
 npm-workspaces monorepo. Node >= 22, npm >= 10.
 
 ```
 services/api/        Express + JS backend (admin + viewer + public waiver/lead routes). DEPLOYED.
 supabase/migrations/ Ordered SQL migrations — the schema source of truth.
-docs/                Architecture, admin-api reference, finance subsystem, audits.
+docs/                Start at `docs/README.md`. Live contracts, status, and domain notes.
+                     Historical snapshots are in `docs/archive/`.
 ```
 
 **Sibling repos (front-ends live elsewhere):**
@@ -28,7 +47,7 @@ docs/                Architecture, admin-api reference, finance subsystem, audit
 npm install              # installs all workspaces
 npm run dev              # API on :3001 (node --watch)
 npm run dev:api          # same as dev
-npm run start            # production start (node src/index.js)
+npm run start            # production start (workspace: node src/index.js in services/api)
 npm run supabase:push    # apply pending migrations to the linked project
 npm run supabase:pull    # pull schema from the linked project
 ```
@@ -55,8 +74,9 @@ cd TU-web && npm run dev
 ## Database workflow (read before changing schema)
 
 - The schema lives in `supabase/migrations/NNNN_*.sql`, applied in numeric order.
-- **Migration sync:** live project is applied through **`0019`** (including
-  `personal_finance_entries`, private-schema grants, `charge_discounts`). Before new
+- **Migration sync:** live project includes **`0001`–`0020`** plus the marketing-lead
+  first/last-name migration. The repo names that last file `0021`, while production
+  records version `20260608191715`; reconcile that history before the next push. Before new
   schema work, confirm in Supabase Dashboard → Database → Migrations or `list_migrations`.
   See `docs/api-schema-audit.md` and `docs/api-capability-audit.md`.
 - To add schema: write a new numbered migration, apply it (`supabase db push` or the
@@ -68,9 +88,10 @@ cd TU-web && npm run dev
 
 ## API conventions
 
-- **Auth:** `/api/admin/*` requires header `x-admin-key` == `ADMIN_API_KEY`. `/api/viewer/*`
+- **Auth:** `/api/admin/*` requires header `x-admin-key` == `ADMIN_API_KEY`. Discord
+  notification routes also accept `x-cron-secret` when `CRON_SECRET` is set. `/api/viewer/*`
   uses Cloudflare Access (JWT + email allowlist). Public: `/api/lead`, `/api/waivers/submit`,
-  `/health`.
+  `/health`, `/health/deep`. Admin-key PDF: `GET /api/waivers/:id/pdf`.
 - **Supabase client** is **service-role** (bypasses RLS) — each route is responsible for its
   own authorization. Never log `ADMIN_API_KEY` or `SUPABASE_SERVICE_ROLE_KEY`, and never
   expose them to any browser/Vite (`VITE_*`) bundle.
@@ -87,7 +108,10 @@ cd TU-web && npm run dev
 
 ## Secrets
 
-`services/api/.env` is git-ignored. For real Supabase access set `SUPABASE_URL`,
-`SUPABASE_SERVICE_ROLE_KEY`, and `ADMIN_API_KEY` (plus optional `DISCORD_WEBHOOK_URL`,
-`SLACK_WEBHOOK_URL`, and the `CF_ACCESS_*` / `WAIVER_VIEWER_*` viewer settings) as
-environment secrets. Project ref: `jhxzecxkccqlgyazhsnb`.
+`services/api/.env` is git-ignored. Copy `services/api/.env.example` as a starting point.
+For real Supabase access set `SUPABASE_URL`,
+`SUPABASE_SERVICE_ROLE_KEY`, and `ADMIN_API_KEY`. Optional: `CRON_SECRET`,
+`ALLOWED_ORIGIN` (defaults to `*`), `DISCORD_WEBHOOK_URL`, `SLACK_WEBHOOK_URL`,
+`CF_ACCESS_TEAM_DOMAIN` / `CF_ACCESS_AUD`, `WAIVER_VIEWER_DEV_BYPASS` /
+`WAIVER_VIEWER_ALLOWED_EMAILS`, `SIGNATURES_BUCKET`, `WAIVERS_BUCKET`, `PDF_ORG_*`,
+and `API_EXPOSE_DB_ERRORS`. Project ref: `jhxzecxkccqlgyazhsnb`.

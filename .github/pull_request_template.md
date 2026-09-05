@@ -18,19 +18,15 @@ Why is this change needed? Link issues or task briefs.
 
 ## UI
 
-- Screenshots/GIFs (EN and ES where applicable)
+- N/A for API-only changes. If a sibling front-end must change, link that PR.
 
 ## Performance
 
-- Impact on bundle size, lazy-loading, or runtime
+- Impact on API latency, query cost, or migration safety
 
-## i18n
+## i18n / Accessibility
 
-- All strings via content keys? EN/ES catalogs updated?
-
-## Accessibility
-
-- Label association, focus, keyboard nav, `html[lang]` considered?
+- N/A unless this change affects waiver PDF copy or a sibling UI contract.
 
 ## Security & Privacy
 
@@ -43,12 +39,12 @@ Why is this change needed? Link issues or task briefs.
 
 ## Docs
 
-- Updated `docs/` and `docs/todo.md` accordingly
+- Updated `docs/` (and `work-queue/` if the task is queued) accordingly
 
 ## Checklist
 
 - [ ] Small, reviewable commits
-- [ ] Typecheck/lint/tests pass
-- [ ] No hard-coded UI strings
+- [ ] Tests pass (`npm --workspace services/api run test`, waiver guard if schema-touched)
+- [ ] No secrets committed
 - [ ] Acceptance criteria met
 

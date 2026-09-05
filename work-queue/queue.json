@@ -1,0 +1,141 @@
+{
+  "schema_version": 2,
+  "repository": "palthol/TU-api",
+  "updated": "2026-09-04",
+  "base_branch": "develop",
+  "production_write_default": false,
+  "task_dir": "work-queue/tasks",
+  "claim_dir": "work-queue/claims",
+  "tasks": [
+    {
+      "id": "API-DOC-001",
+      "lane": "docs",
+      "status": "done",
+      "depends_on": [],
+      "production_writes": false,
+      "brief": "work-queue/tasks/API-DOC-001.md"
+    },
+    {
+      "id": "API-DEV-001",
+      "lane": "tooling",
+      "status": "ready",
+      "depends_on": ["API-DOC-001"],
+      "production_writes": false,
+      "brief": "work-queue/tasks/API-DEV-001.md",
+      "allowed_paths": ["package-lock.json", "package.json", "services/api/package.json"]
+    },
+    {
+      "id": "API-SEC-001",
+      "lane": "security",
+      "status": "blocked",
+      "depends_on": ["API-DEV-001"],
+      "production_writes": false,
+      "brief": "work-queue/tasks/API-SEC-001.md"
+    },
+    {
+      "id": "API-TEST-001",
+      "lane": "tests",
+      "status": "blocked",
+      "depends_on": ["API-DEV-001"],
+      "production_writes": false,
+      "brief": "work-queue/tasks/API-TEST-001.md"
+    },
+    {
+      "id": "API-TEST-002",
+      "lane": "tests",
+      "status": "blocked",
+      "depends_on": ["API-DEV-001"],
+      "production_writes": false,
+      "brief": "work-queue/tasks/API-TEST-002.md"
+    },
+    {
+      "id": "API-OPS-001",
+      "lane": "deployment",
+      "status": "ready",
+      "depends_on": ["API-DOC-001"],
+      "production_writes": false,
+      "brief": "work-queue/tasks/API-OPS-001.md",
+      "allowed_paths": ["docs/current-state.md", "docs/use-guide.md", "AGENTS.md", "docs/README.md"]
+    },
+    {
+      "id": "API-GATE-001",
+      "lane": "validation",
+      "status": "blocked",
+      "depends_on": ["API-DEV-001", "API-TEST-001", "API-TEST-002", "API-OPS-001"],
+      "production_writes": false,
+      "brief": "work-queue/tasks/API-GATE-001.md"
+    },
+    {
+      "id": "API-VAL-001",
+      "lane": "validation",
+      "status": "blocked",
+      "depends_on": ["API-GATE-001"],
+      "production_writes": false,
+      "brief": "work-queue/tasks/API-VAL-001.md"
+    },
+    {
+      "id": "API-VAL-002",
+      "lane": "validation",
+      "status": "blocked",
+      "depends_on": ["API-GATE-001"],
+      "production_writes": false,
+      "brief": "work-queue/tasks/API-VAL-002.md"
+    },
+    {
+      "id": "API-HARD-001",
+      "lane": "backend",
+      "status": "blocked",
+      "depends_on": ["API-TEST-001", "API-VAL-001"],
+      "production_writes": false,
+      "brief": "work-queue/tasks/API-HARD-001.md"
+    },
+    {
+      "id": "API-HARD-002",
+      "lane": "backend",
+      "status": "blocked",
+      "depends_on": ["API-GATE-001"],
+      "production_writes": false,
+      "brief": "work-queue/tasks/API-HARD-002.md"
+    },
+    {
+      "id": "API-SCHED-001",
+      "lane": "backend",
+      "status": "blocked",
+      "depends_on": ["API-TEST-002", "API-VAL-002"],
+      "production_writes": false,
+      "brief": "work-queue/tasks/API-SCHED-001.md"
+    },
+    {
+      "id": "API-AUTO-001",
+      "lane": "automation",
+      "status": "blocked",
+      "depends_on": ["API-OPS-001", "API-VAL-001"],
+      "production_writes": false,
+      "brief": "work-queue/tasks/API-AUTO-001.md"
+    },
+    {
+      "id": "API-AUTO-002",
+      "lane": "automation",
+      "status": "blocked",
+      "depends_on": ["API-OPS-001", "API-VAL-001"],
+      "production_writes": false,
+      "brief": "work-queue/tasks/API-AUTO-002.md"
+    },
+    {
+      "id": "API-AUTH-001",
+      "lane": "security",
+      "status": "blocked",
+      "depends_on": ["API-OPS-001"],
+      "production_writes": false,
+      "brief": "work-queue/tasks/API-AUTH-001.md"
+    },
+    {
+      "id": "API-PAY-001",
+      "lane": "integrations",
+      "status": "blocked",
+      "depends_on": ["API-HARD-001", "API-AUTH-001"],
+      "production_writes": false,
+      "brief": "work-queue/tasks/API-PAY-001.md"
+    }
+  ]
+}

@@ -16,7 +16,7 @@ Files/modules allowed to change; related features explicitly excluded.
 
 ## Constraints
 
-Performance (bundle, lazy-loading), i18n (EN/ES), accessibility (labels, focus), security/privacy.
+Auth (`x-admin-key` / cron / Cloudflare Access), money in integer cents, migration safety, no production writes unless the task authorizes them.
 
 ## Acceptance Criteria
 
@@ -34,11 +34,11 @@ Known constraints or debt tolerated; potential rollbacks.
 
 ## Testing
 
-Unit/integration; ES render snapshots or PDF hash snapshots if relevant.
+Unit/integration; waiver guard if schema-touched; PDF snapshots if the renderer changed.
 
 ## Docs
 
-Which docs to update (architecture, schema, controller, testing, ops, TODO).
+Which docs to update (`admin-api.md`, schema audit, `current-state.md`, work-queue).
 
 ## Rollout
 

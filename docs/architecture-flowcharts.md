@@ -24,13 +24,16 @@ flowchart TB
     M[Marketing app]
     W[Waiver app]
     D[Dashboard ops app]
+    V[Waiver viewer]
   end
 
   subgraph api [services/api Express]
     H["/health"]
+    HD["/health/deep"]
     SUB["POST /api/waivers/submit"]
     PDF["GET /api/waivers/:id/pdf"]
     ADM["/api/admin/*"]
+    VW["/api/viewer/*"]
   end
 
   subgraph sb [Supabase]
@@ -40,13 +43,14 @@ flowchart TB
 
   M -->|"static content / links"| W
   W -->|JSON submit| SUB
-  W -->|optional PDF download| PDF
   D -->|x-admin-key| ADM
   D -->|x-admin-key| PDF
+  V -->|Cloudflare Access| VW
   SUB --> PG
   SUB --> ST
   PDF --> PG
   ADM --> PG
+  VW --> PG
 ```
 
 ---
@@ -105,7 +109,7 @@ flowchart LR
   WL -->|GET /api/admin/waivers/:id| API
 ```
 
-Registered server routes include [`registerAdminBillingRoutes`](../services/api/src/routes/admin/billing.js), [`registerAdminParticipantRoutes`](../services/api/src/routes/admin/participants.js), and [`registerAdminReportingRoutes`](../services/api/src/routes/admin/reporting.js), all behind `requireAdmin` on [`/api/admin`](../services/api/src/index.js).
+Registered server routes include billing, participants, reporting, scheduling, and waivers behind `requireAdmin` on `/api/admin`, plus Discord notification routes that also accept `x-cron-secret`.
 
 ---
 
@@ -113,4 +117,4 @@ Registered server routes include [`registerAdminBillingRoutes`](../services/api/
 
 - **Public funnel:** Marketing → (link) → Waiver app.
 - **Core integration:** Waiver app → Express `POST /api/waivers/submit` → Supabase tables + Storage + account binding.
-- **Back office:** `admin/apps/dashboard` and `admin/apps/receipts` (API key) → Express admin + reporting endpoints → same Supabase data.
+- **Back office:** `admin/apps/dashboard` and `admin/apps/receipts` (API key) → Express admin + reporting endpoints → same Supabase data. Waiver viewer uses Cloudflare Access → `GET /api/viewer/waiver-documents`.

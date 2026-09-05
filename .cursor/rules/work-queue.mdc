@@ -1,0 +1,14 @@
+---
+description: How agents claim and complete work-queue tasks in this API repo
+alwaysApply: true
+---
+
+# Work queue
+
+- Before implementing, read `work-queue/README.md` and pick one `ready` task from `work-queue/queue.json`.
+- Open `work-queue/tasks/<ID>.md` and follow it. Do not invent extra scope.
+- Claim by creating `work-queue/claims/<ID>.md` from the template. If that file already exists, stop and pick another task.
+- Branch from `develop` as `agent/<ID>-short-slug`.
+- Production database writes are **forbidden** unless the task file sets `Production writes: yes`.
+- Stay inside `allowed_paths` plus the shared queue files listed in the README.
+- When done: run the task's verify commands, update `queue.json` / README status, leave evidence in the claim, and do not start a blocked successor unless asked.
