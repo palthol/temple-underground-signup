@@ -51,7 +51,7 @@
     {
       "id": "API-OPS-001",
       "lane": "deployment",
-      "status": "ready",
+      "status": "done",
       "depends_on": ["API-DOC-001"],
       "production_writes": false,
       "brief": "work-queue/tasks/API-OPS-001.md",
