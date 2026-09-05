@@ -106,12 +106,20 @@ cd TU-web && npm run dev
   documented in `docs/admin-api.md` and mirrored in the `admin` repo's
   `docs/frontend-design/`.
 
+## Deployment
+
+Production API runs on **Render** at **`https://api.templeunderground.com`**
+(Render hostname `temple-underground-signup.onrender.com`). Health:
+`GET /health`, `GET /health/deep`. CORS uses `ALLOWED_ORIGIN` or defaults to `*`.
+Inventory: [`docs/deployment.md`](docs/deployment.md).
+
 ## Secrets
 
 `services/api/.env` is git-ignored. Copy `services/api/.env.example` as a starting point.
 For real Supabase access set `SUPABASE_URL`,
-`SUPABASE_SERVICE_ROLE_KEY`, and `ADMIN_API_KEY`. Optional: `CRON_SECRET`,
+`SUPABASE_SERVICE_ROLE_KEY`, and `ADMIN_API_KEY`. Optional: `PORT`, `CRON_SECRET`,
 `ALLOWED_ORIGIN` (defaults to `*`), `DISCORD_WEBHOOK_URL`, `SLACK_WEBHOOK_URL`,
 `CF_ACCESS_TEAM_DOMAIN` / `CF_ACCESS_AUD`, `WAIVER_VIEWER_DEV_BYPASS` /
 `WAIVER_VIEWER_ALLOWED_EMAILS`, `SIGNATURES_BUCKET`, `WAIVERS_BUCKET`, `PDF_ORG_*`,
-and `API_EXPOSE_DB_ERRORS`. Project ref: `jhxzecxkccqlgyazhsnb`.
+and `API_EXPOSE_DB_ERRORS`. Project ref: `jhxzecxkccqlgyazhsnb`. Never commit secret
+values or tokenized webhook URLs.

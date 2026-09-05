@@ -38,7 +38,7 @@ Do not rewrite other tasks' rows. Parallel agents: `API-DEV-001` and
 | [API-SEC-001](tasks/API-SEC-001.md) | security | blocked | API-DEV-001 | Triage dependency findings and safe upgrades |
 | [API-TEST-001](tasks/API-TEST-001.md) | tests | blocked | API-DEV-001 | Add billing/receipt route integration tests |
 | [API-TEST-002](tasks/API-TEST-002.md) | tests | blocked | API-DEV-001 | Add subscription/scheduling route integration tests |
-| [API-OPS-001](tasks/API-OPS-001.md) | deployment | ready | API-DOC-001 | Inventory API deployment, hostname, CORS, env names, and ownership |
+| [API-OPS-001](tasks/API-OPS-001.md) | deployment | done | API-DOC-001 | Inventory API deployment, hostname, CORS, env names, and ownership |
 | [API-GATE-001](tasks/API-GATE-001.md) | validation | blocked | API-DEV-001, API-TEST-001, API-TEST-002, API-OPS-001 | Define safe non-production validation environment |
 | [API-VAL-001](tasks/API-VAL-001.md) | validation | blocked | API-GATE-001 | Smoke-test finance and receipt workflows |
 | [API-VAL-002](tasks/API-VAL-002.md) | validation | blocked | API-GATE-001 | Smoke-test subscriptions, scheduling, and entitlements |

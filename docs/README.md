@@ -19,6 +19,7 @@ Read in this order for day-to-day work:
 | [api-schema-audit.md](./api-schema-audit.md) | Live DB vs code |
 | [api-capability-audit.md](./api-capability-audit.md) | Domain capability matrix |
 | [use-guide.md](./use-guide.md) | Operator setup and day-to-day |
+| [deployment.md](./deployment.md) | API host, platform, health, CORS, env names |
 | [database-overview.md](./database-overview.md) | Schema map |
 
 ## Domain references

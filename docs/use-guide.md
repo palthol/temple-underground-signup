@@ -39,10 +39,20 @@ A single-operator guide for **building**, **maintaining**, and **using** this ap
   - `SUPABASE_URL`
   - `SUPABASE_SERVICE_ROLE_KEY` (for server-side PDF/DB access)
   - `ADMIN_API_KEY` (required for `/api/admin/*` and the on-demand PDF route)
-  - Optional: `CRON_SECRET`, `ALLOWED_ORIGIN`, `DISCORD_WEBHOOK_URL`, `SLACK_WEBHOOK_URL`
+  - Optional: `PORT`, `ALLOWED_ORIGIN` (defaults to `*` when unset), `CRON_SECRET`,
+    `DISCORD_WEBHOOK_URL`, `SLACK_WEBHOOK_URL`, Cloudflare viewer vars
+    (`CF_ACCESS_TEAM_DOMAIN`, `CF_ACCESS_AUD`, `WAIVER_VIEWER_DEV_BYPASS`,
+    `WAIVER_VIEWER_ALLOWED_EMAILS`), storage (`SIGNATURES_BUCKET`, `WAIVERS_BUCKET`),
+    PDF letterhead (`PDF_ORG_NAME`, `PDF_ORG_TAGLINE`, `PDF_ORG_ADDRESS`), and
+    `API_EXPOSE_DB_ERRORS`
+  - Full name list: `services/api/.env.example` and [deployment.md](./deployment.md)
+- **Production API host** — `https://api.templeunderground.com` (Render;
+  also `https://temple-underground-signup.onrender.com`). Set sibling
+  `VITE_API_BASE_URL` to that URL (no trailing slash). Details:
+  [deployment.md](./deployment.md).
 - **Waiver viewer app** — Set `VITE_API_BASE_URL` if the API is not at `http://localhost:3001`. The viewer uses Cloudflare Access and must not receive `VITE_ADMIN_API_KEY`.
 
-Keep `.env` out of git (already in `.gitignore`).
+Keep `.env` out of git (already in `.gitignore`). Never commit secret values or webhook URLs.
 
 **Dashboard: Auth redirect URLs (password reset / magic links)**  
 If you use “Send password recovery” or magic links, Supabase redirects the user back to your app after they click the link. That redirect target is configured in the Supabase project, **not** in `.env`. If it’s wrong (e.g. `http://localhost:3000` while the dashboard runs on **5174**), you’ll see `access_denied` or land on the wrong page.
@@ -133,7 +143,18 @@ npm run dev:api
 ```
 
 Or from `services/api`: `npm run dev`.  
-Production: `npm run start` from root or from `services/api`.
+Production: `npm run start` from root or from `services/api` (Render runs the same
+workspace start; binds `PORT`).
+
+**Health (local or production):**
+
+- `GET /health` → `{ "ok": true }`
+- `GET /health/deep` → `{ "ok": true, "db": true }` when Supabase is reachable
+
+Production base URL: `https://api.templeunderground.com`. See [deployment.md](./deployment.md).
+
+**CORS:** set `ALLOWED_ORIGIN` to a single origin when locking down browsers; if the
+variable is absent, the API defaults to `*` (allow all).
 
 ### 3.3 API + waiver together
 
