@@ -18,7 +18,7 @@
     {
       "id": "API-DEV-001",
       "lane": "tooling",
-      "status": "ready",
+      "status": "done",
       "depends_on": ["API-DOC-001"],
       "production_writes": false,
       "brief": "work-queue/tasks/API-DEV-001.md",
@@ -27,7 +27,7 @@
     {
       "id": "API-SEC-001",
       "lane": "security",
-      "status": "blocked",
+      "status": "ready",
       "depends_on": ["API-DEV-001"],
       "production_writes": false,
       "brief": "work-queue/tasks/API-SEC-001.md"
@@ -35,7 +35,7 @@
     {
       "id": "API-TEST-001",
       "lane": "tests",
-      "status": "blocked",
+      "status": "ready",
       "depends_on": ["API-DEV-001"],
       "production_writes": false,
       "brief": "work-queue/tasks/API-TEST-001.md"
@@ -43,7 +43,7 @@
     {
       "id": "API-TEST-002",
       "lane": "tests",
-      "status": "blocked",
+      "status": "ready",
       "depends_on": ["API-DEV-001"],
       "production_writes": false,
       "brief": "work-queue/tasks/API-TEST-002.md"
