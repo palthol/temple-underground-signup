@@ -1,20 +1,21 @@
 # API task claim
 
-- Task ID: `API-TASK-ID`
-- Owner: `agent-or-task-name`
-- Claimed at: `YYYY-MM-DDTHH:MM:SSZ`
-- Base commit: `SHA`
+- Task ID:
+- Owner:
+- Claimed at:
+- Base branch: `develop`
+- Base commit:
 - Production write authorized: no
 - Status: `in_progress`
 
 ## Scope and allowed files
 
-Copy the queue scope here and list exact files or narrow globs.
+Copy `allowed_paths` from `work-queue/tasks/<ID>.md`.
 
 ## Verification evidence
 
-Record commands and outcomes.
+Commands run, exit codes, and what you did **not** do (especially production writes).
 
 ## Handoff or blocker
 
-State what remains and the exact blocking condition.
+`done` with leftover risk, or the exact blocking condition and who must clear it.

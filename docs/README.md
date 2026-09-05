@@ -4,7 +4,7 @@ Read in this order for day-to-day work:
 
 1. [current-state.md](./current-state.md) — what is verified vs unproven
 2. [admin-api.md](./admin-api.md) — request/response contracts
-3. [../work-queue/README.md](../work-queue/README.md) — live tasks
+3. [../work-queue/README.md](../work-queue/README.md) — live tasks (`queue.json` + `tasks/<ID>.md`)
 4. [target-state.md](./target-state.md) and [reviewer-guide.md](./reviewer-guide.md) — direction and review bar
 
 ## Operating

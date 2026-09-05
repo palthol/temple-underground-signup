@@ -13,6 +13,16 @@ Also read the repository control documents before starting work:
 - `work-queue/README.md`
 - `docs/reviewer-guide.md`
 
+## Taking a task
+
+1. Read `work-queue/README.md`. Pick one `ready` task from `work-queue/queue.json`.
+2. Follow `work-queue/tasks/<ID>.md` only.
+3. Create `work-queue/claims/<ID>.md` from the template. If it already exists, stop.
+4. Branch from `develop` as `agent/<ID>-short-slug`.
+5. Production DB writes are forbidden unless the task file says otherwise.
+6. Stay in `allowed_paths` plus the shared queue files in the README.
+7. Verify with the commands in the brief; mark the task `done` in `queue.json` and the README table.
+
 npm-workspaces monorepo. Node >= 22, npm >= 10.
 
 ```

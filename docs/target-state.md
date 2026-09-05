@@ -24,4 +24,5 @@ The API remains the only backend and canonical Supabase migration owner.
 4. Add scheduling and billing automation.
 5. Implement individual staff authorization, payment integration, and delivery services.
 
-Execution order is maintained in `../work-queue/README.md`.
+Execution order is maintained in [`work-queue/README.md`](../work-queue/README.md).
+Each task has a brief under `work-queue/tasks/`.
