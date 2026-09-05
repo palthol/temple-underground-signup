@@ -225,7 +225,7 @@ UI tabs in `admin/apps/receipts` mirror: Cash log, Invoice, Recent, Formal, Prev
 
 ### 6.3 Export surface
 
-- **Consumer:** dashboard (or server job) calls a **single documented endpoint** e.g. `GET /api/admin/finance/monthly-summary?month=YYYY-MM` (to be implemented; contract above is normative).
+- **Consumer:** dashboard (or server job) calls `GET /api/admin/finance/monthly-summary?month=YYYY-MM` (implemented; contract below matches [admin-api.md](./admin-api.md)).
 - **Cadence:** on-demand + optional nightly materialized refresh (implementation choice).
 - **Source of truth:** aggregates computed from **Postgres** tables/views, not from client-only state.
 

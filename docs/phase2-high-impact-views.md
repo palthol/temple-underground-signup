@@ -1,8 +1,10 @@
-# Phase 2 High-Impact Views (DB-Only)
+# Phase 2 High-Impact Views
 
 This document describes the five Phase 2 operational/finance views added in:
 
 - `supabase/migrations/0011_phase2_high_impact_ops_finance_views.sql`
+
+API slugs for these views are live (`today-sessions`, `upcoming-access-issues`, `waiver-compliance-gaps`, `ar-aging`, `payment-risk`). See [admin-api.md](./admin-api.md).
 
 ---
 
@@ -139,7 +141,7 @@ This matches current admin/reporting RLS access patterns.
 ## Validation artifact
 
 Use:
-- `docs/(working)/phase2-high-impact-views-validation.sql`
+- `docs/archive/working/phase2-high-impact-views-validation.sql`
 
 It includes:
 - existence checks,

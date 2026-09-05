@@ -32,7 +32,7 @@ push. Next work is
 
 ---
 
-## 1. How the API fits the monorepo
+## 1. How the API fits the platform
 
 ```mermaid
 flowchart TB
@@ -215,7 +215,7 @@ Full request/response contracts: [admin-api.md](./admin-api.md) § Scheduling.
 | `GET /api/admin/reporting/views/today-sessions` | `view_ops_today_sessions` — day-of board (excludes cancelled) |
 | `GET /api/admin/reporting/views/upcoming-access-issues` | Entitlement/access problems |
 | `GET /api/admin/reporting/views/attendance-utilization-weekly` | Weekly utilization analytics |
-| `GET /api/admin/reporting/views/entitlement-status` | Per-participant entitlement snapshot |
+| `GET /api/admin/reporting/views/participant-entitlements` | Per-participant entitlement snapshot |
 | `POST /api/admin/billing/per-class/charge-from-attendance` | Creates charge **given** `attendance_record_id` |
 
 **Still missing (future):**
@@ -246,6 +246,7 @@ template/batch generation—not core session CRUD.
 | Method | Path | Purpose |
 |--------|------|---------|
 | GET | `/health` | Liveness |
+| GET | `/health/deep` | Service-role DB reachability |
 | POST | `/api/lead` | Marketing lead capture |
 | POST | `/api/waivers/submit` | Waiver + participant bind + notifications |
 | GET | `/api/admin/waivers`, `/api/admin/waivers/:id` | Waiver list + signed URLs |

@@ -1,6 +1,9 @@
-# Schema Changes and Admin API Alignment (Current Truth = Migrations 0001-0012)
+# Schema Changes and Admin API Alignment
 
-This document compares the prior process documentation in `docs/(working) operations-table-process-map.md` against the current schema represented by:
+> **Historical snapshot** (migrations `0001`–`0012` only). Not the live schema.
+> Current truth is `supabase/migrations/` through **`0021`**, [api-schema-audit.md](../../api-schema-audit.md), and [admin-api.md](../../admin-api.md).
+
+This document compares the prior process documentation in `operations-table-process-map.md` against the schema represented by:
 
 - `supabase/migrations/0001_foundation_schema.sql`
 - `supabase/migrations/0002_business_logic_and_affiliations.sql`
@@ -15,13 +18,13 @@ This document compares the prior process documentation in `docs/(working) operat
 - `supabase/migrations/0011_phase2_high_impact_ops_finance_views.sql`
 - `supabase/migrations/0012_phase3_analytics_views.sql`
 
-The schema above is treated as the intended source of truth.
+The schema above was treated as the intended source of truth **at the time this note was written**. Later migrations (`0013`–`0021`) supersede that cutoff.
 
 ---
 
 ## 1) Changes vs Previous Operations Map
 
-Previous doc baseline: `docs/(working) operations-table-process-map.md`.
+Previous doc baseline: `operations-table-process-map.md`.
 
 ### Added process areas not captured in previous doc
 

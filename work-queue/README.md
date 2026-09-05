@@ -3,6 +3,8 @@
 `queue.json` is the machine-readable index. This document defines scope and acceptance
 criteria. Production writes default to **not authorized**.
 
+Doc map: `docs/README.md`. Historical checklists live in `docs/archive/`.
+
 ## Claim protocol
 
 1. Confirm every dependency is `done`.

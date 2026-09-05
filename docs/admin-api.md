@@ -27,6 +27,14 @@ runtime; they do not read `VITE_ADMIN_API_KEY`.
 
 ## Endpoints
 
+### `GET /health` (public)
+
+Liveness. **Response:** `{ "ok": true }`
+
+### `GET /health/deep` (public)
+
+Checks that the service-role client can reach `participants`. **Response:** `{ "ok": true, "db": true }` or `500` `{ "ok": false, "db": false, "error": "supabase_not_configured" | "db_unreachable" | "server_error" }`.
+
 ### `POST /api/lead` (public)
 
 Stores a marketing-site trial inquiry in **`marketing_leads`**. No admin key. Rate-limit at the edge in production if needed.
@@ -66,7 +74,7 @@ Notification failures are logged server-side and do **not** fail an otherwise su
 
 ### `GET /api/admin/waivers`
 
-Minimal authenticated list endpoint for future waiver review UI work. Reads `view_waiver_documents`.
+Minimal authenticated list of `view_waiver_documents`. The Cloudflare Access viewer uses `GET /api/viewer/waiver-documents` instead.
 
 **Query:**
 
@@ -75,18 +83,42 @@ Minimal authenticated list endpoint for future waiver review UI work. Reads `vie
 
 **Response:** `{ "ok": true, "limit": 50, "offset": 0, "rowCount": N, "rows": [...] }`
 
-The standalone waiver viewer app (`admin/apps/waiver-viewer`) uses the richer reporting endpoint for the same underlying Supabase view:
+The standalone waiver viewer (`admin/apps/waiver-viewer`) reads the same view through Cloudflare Access, not the admin key:
 
 ```text
-GET /api/admin/reporting/views/waiver-documents?sort=signed_at_utc&order=desc
-GET /api/admin/reporting/views/waiver-documents?sort=participant_full_name&order=asc
+GET /api/viewer/waiver-documents?sort=signed_at_utc&order=desc
+GET /api/viewer/waiver-documents?sort=participant_full_name&order=asc
 ```
+
+Operators with an admin key can still use `GET /api/admin/reporting/views/waiver-documents` with the same query parameters.
 
 ---
 
 ### `GET /api/admin/waivers/:id`
 
 Existing: waiver metadata + signed URLs for PDF and signature.
+
+---
+
+### `POST /api/admin/billing/external-counterparty-accounts`
+
+Creates an `accounts` row for a walk-in / non-member payer (no participant required).
+
+**Body (JSON):**
+
+```json
+{
+  "display_name": "Walk-in payer",
+  "phone": "optional",
+  "email": "optional",
+  "notes": "optional",
+  "created_by": "optional string"
+}
+```
+
+**Response:** `{ "ok": true, "account_id": "<uuid>", "account": { ... } }`
+
+**Errors:** `400` — `display_name_required`, `account_insert_failed`
 
 ---
 
@@ -692,7 +724,15 @@ Monthly finance summary contract for dashboard export and bookkeeping sustainabi
 
 ## Waiver PDF routes
 
-Mounted under `/api/waivers/*` with the same `requireAdmin` pattern where applicable (see `services/api/src/index.js`).
+### `GET /api/waivers/:id/pdf`
+
+On-demand HTML → PDF render. Requires `x-admin-key`. Does not persist a new PDF; streams a buffer.
+
+**Response:** `200` `application/pdf` with `Content-Disposition: inline; filename="waiver-<id>.pdf"`, plus headers `X-Waiver-Locale` and `X-Waiver-Version`.
+
+**Errors:** `400` `waiver_id_required`; `404` `waiver_not_found`; `500` `supabase_not_configured` / render failure.
+
+The current dashboard opens the **stored** signed PDF from `GET /api/admin/waivers/:id` rather than this renderer. See [waiver-pdf-generation.md](./waiver-pdf-generation.md).
 
 ---
 

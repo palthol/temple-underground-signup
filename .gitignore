@@ -4,6 +4,7 @@ dist/
 *.log
 .env
 .env.*
+!.env.example
 coverage/
 tmp/
 pnpm-lock.yaml

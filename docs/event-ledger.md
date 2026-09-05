@@ -192,7 +192,7 @@ order by occurred_at asc;
 - Some business actions are represented by multiple low-level events (for example, a conversion may emit subscription + charge events).
 - Use `correlation_id` and `reason_code` to improve causality stitching as API context propagation is expanded.
 - For scenario testing, use:
-  - `docs/(working)/event-ledger-validation-scenarios.sql`
+  - `docs/archive/working/event-ledger-validation-scenarios.sql`
 
 ---
 

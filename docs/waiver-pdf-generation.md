@@ -8,8 +8,8 @@ This iteration introduces on-demand PDF generation for Temple Underground waiver
 
 ## Target Experience
 
-- **API endpoint:** `GET /api/waivers/:waiverId/pdf`
-  - Accepts the waiver UUID returned after submission.
+- **API endpoint:** `GET /api/waivers/:id/pdf`
+  - Accepts the waiver UUID returned after submission (`waiverId` in the submit response).
   - Authorizes requests with the admin key. Participant-scoped authorization is not
     implemented.
   - Loads waiver, participant, medical history, emergency contact, and audit metadata.
@@ -36,13 +36,13 @@ This iteration introduces on-demand PDF generation for Temple Underground waiver
   - `emergency_contacts`
   - `audit_trails`
 - Maps the fetched rows through `services/api/src/pdf/data/mapWaiverToPayload.js`.
-- Legal copy is sourced from the existing i18n strings (`release`, `indemnification`, `media`, `acknowledgement`) based on the waiver locale.
+- Legal copy is sourced from `services/api/src/pdf/legal/legalCopy.js` (`release`, `indemnification`, `media`, `acknowledgement`) based on the waiver locale.
 
 ## Rendering Pipeline
 
 1. Fetch the waiver and related records through `fetchWaiverById`.
-2. Map the record into the `WaiverPdfPayload` structure.
-3. Inject payload values into `src/pdf/templates/waiver.html`.
+2. Map the record with `mapWaiverToPayload` (plain object consumed by the HTML template).
+3. Inject payload values into `services/api/src/pdf/templates/waiver.html`.
 4. Render HTML → PDF with Playwright/Chromium.
 5. Respond with `application/pdf`, streaming the buffer and setting filename metadata.
 

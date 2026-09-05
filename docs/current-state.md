@@ -49,4 +49,4 @@ not.
 
 - `npm --workspace services/api test`: 18/18 passing.
 - `npm run guard:waiver-schema`: passing.
-- Production schema and counts: read-only Supabase inspection, 2026-09-03.
+- Documentation reconciled against the mounted route list, migrations `0001`–`0021`, and test files (2026-09-03).

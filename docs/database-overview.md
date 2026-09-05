@@ -11,7 +11,7 @@ Summary of what the current schema and migrations provide, and optional next ste
 
 | Area                      | Tables / objects                                                                                                                      | Purpose                                                                                                                                                                  |
 | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Waivers**               | `participants`, `waivers`, `emergency_contacts`, `waiver_medical_histories`, `audit_trails`                                           | Signup flow, one waiver per participant (with medical + emergency contact), audit per submission.                                                                        |
+| **Waivers**               | `participants`, `waivers`, `emergency_contacts`, `waiver_medical_histories`, `audit_trails`                                           | Signup flow; a participant may have multiple waiver rows (medical + emergency contact per submission), plus an audit row per submission. |
 | **View**                  | `view_waiver_documents`                                                                                                               | One row per waiver with participant, medical, emergency contact, and latest audit — used for PDF generation and reporting.                                               |
 | **Accounts & billing**    | `accounts`, `account_members`, `plan_definitions`, `plan_entitlements`, `subscriptions`, `charges`, `payments`, `payment_allocations` | One account (payer) can have many participants; plans define price and entitlements; subscriptions link account+participant to a plan; charges and payments are ledgers. |
 | **Schedule & attendance** | `schedule_templates`, `sessions`, `attendance_records`, `private_usage`, `entitlement_credits`, `access_overrides`                    | Recurring schedule, concrete sessions, who attended; private minutes; bonus credits; time-limited overrides.                                                             |
@@ -38,14 +38,14 @@ Create participant and waiver (and related rows); query `view_waiver_documents` 
 - **Charge generation** — Only when you call `generate_monthly_charges()`. No automatic cron in the DB.  
 - **Per-session / other cadences** — No built-in logic to create charges for `per_session`, `contract`, or `custom`; you’d add that in app code or new functions.  
 - **Payment processing** — No Stripe/payment-provider integration; `payments` and `payment_allocations` are manual (or your app fills them).  
-- **Public waiver submission** — Waiver tables are admin-only. If you want participants to submit waivers from the web app without being admins, you need additional RLS policies (or a backend that uses service_role to insert on their behalf).  
+- **Public waiver submission** — Waiver tables stay admin-only at the RLS layer. Participants submit through `POST /api/waivers/submit`, which uses the API’s **service role**. Do not add anonymous RLS write policies unless that is an explicit product change.  
 - **Auth** — Supabase Auth handles login; `app_admin` only decides who can access **data** in this project.
 
 ---
 
 ## 2. Indexes and performance (current + one extra)
 
-Already in place (migrations 0001–0009):
+Already in place (migrations `0001`–`0021`):
 
 - Core FKs and common filters: participants (email, full_name); waivers (participant_id, signed_at_utc); audit_trails (participant_id, waiver_id + created_at); emergency_contacts, waiver_medical_histories; accounts (status); subscriptions, charges, payments, payment_allocations, sessions, attendance_records, private_usage, access_overrides, entitlement_credits; plan_entitlements (plan_definition_id).
 - Billing: partial index on `charges(subscription_id, coverage_start)` where `status != 'void'` for `generate_monthly_charges()`.

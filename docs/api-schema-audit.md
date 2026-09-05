@@ -208,6 +208,6 @@ every integrity query from the 2026-06-01 audit. See the workspace
 - [ ] Smoke-test Tier 1 endpoints (scheduling CRUD, subscription enrollment, cron auth).
 - [ ] (Optional hardening) Wrap `record-payment` and waiver submit in atomic RPCs or add
       idempotency keys.
-- [ ] Update `docs/(working) schema-changes-and-admin-api-alignment.md` — it is pinned to
-      migrations `0001–0012` and predates `0014–0020` (receipts, leads, expenses,
-      personal finance, discounts, Tier 1 scheduling/subscriptions).
+- [x] Historical schema-alignment note archived at
+      `docs/archive/working/schema-changes-and-admin-api-alignment.md` (pinned to
+      `0001`–`0012`; not current truth).

@@ -1,6 +1,6 @@
 # Application ownership and data flow
 
-This document is the high-level map of **all deployable applications**, who owns which data, and how data is created/read/updated across the platform.
+This document is the high-level map of **all deployable applications**, who owns which data, and how data is created/read/updated across the platform. Front-ends live in sibling repos; this repository owns only `services/api` and `supabase/`.
 
 ## 1) Application inventory
 
@@ -36,7 +36,7 @@ This document is the high-level map of **all deployable applications**, who owns
 flowchart LR
   subgraph publicApps [Public_apps]
     marketing[marketing_app]
-    waiver[waiver_v2_app]
+    waiver[TU_Signup]
   end
 
   subgraph internalApps [Internal_apps]

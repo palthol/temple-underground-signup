@@ -1,8 +1,8 @@
 # Infrastructure additions checklist
 
-> **Status note (2026-09-03):** This checklist predates the completed scheduling and
-> subscription work. The corrected baseline below is authoritative; new execution should
-> be tracked in the workspace `work-queue/README.md`.
+> **Archived (2026-09-04).** Not the live task list.
+> Use [`work-queue/README.md`](../../work-queue/README.md) and
+> [`docs/api-capability-audit.md`](../api-capability-audit.md).
 
 **Purpose:** Turn the existing Postgres schema and admin API into daily staff workflows — without ad-hoc SQL.  
 **Companion docs:** [api-capability-audit.md](./api-capability-audit.md), [admin-api.md](./admin-api.md), [api-schema-audit.md](./api-schema-audit.md), [finance-subsystem-design.md](./finance-subsystem-design.md).
@@ -52,7 +52,7 @@ Apply these steps for **each** feature below, not only once at the end.
 - [ ] **Event ledger** — Important writes should flow through tables/RPCs already captured by `event_ledger` triggers (or extend capture config if adding tables).
 - [ ] **Money** — All amounts in **integer cents**; allocations respect `view_charge_net`.
 - [ ] **Tests** — At least one API test or documented curl smoke for happy path + one failure path (`npm --workspace services/api run test`).
-- [ ] **Ops** — Env vars on deployed API (Render/etc.): webhooks, Stripe secrets, cron auth if routes are hit by scheduler.
+- [ ] **Ops** — Env vars on deployed API (Render/etc.): webhooks, `CRON_SECRET` if routes are hit by a scheduler. Do not invent Stripe secrets until payment-provider work starts.
 - [ ] **Live verify** — After migration: confirm applied version in Supabase Dashboard; update [api-schema-audit.md](./api-schema-audit.md) checklist if schema changed.
 
 ---
@@ -77,8 +77,8 @@ Apply these steps for **each** feature below, not only once at the end.
 **UI follow-up (same tier):**
 
 - [x] Active dashboard scheduling controls call the admin API. An unreachable legacy
-      `SessionsPage.tsx` still reads Supabase directly and is tracked by workspace task
-      `ARCH-001`.
+      `SessionsPage.tsx` in the `admin` repo still reads Supabase directly and should be
+      removed there.
 - [ ] Wire `today-sessions` view on a single **Today** page with actions (check-in, add walk-in).
 
 **Definition of done:** Operator can run a class night end-to-end: session exists → roster checked in → `view_ops_today_sessions` reflects counts → optional `charge-from-attendance` still works when `attendance_record_id` exists.
@@ -259,4 +259,4 @@ After migrations: `npm run supabase:push` (linked project) and update [api-schem
 
 ---
 
-*Last updated: 2026-06-01. Tier list aligned with product priority; technical gaps sourced from [api-capability-audit.md](./api-capability-audit.md).*
+*Last updated: 2026-09-03. Execution tracking is in `work-queue/README.md`; this checklist is a capability map, not the live task queue.*

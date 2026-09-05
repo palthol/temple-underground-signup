@@ -4,7 +4,7 @@ This document describes analytics views introduced by:
 
 - `supabase/migrations/0012_phase3_analytics_views.sql`
 
-These views are DB-ready analytics foundations. API slug exposure, filters/pagination, and dashboard wiring are intentionally deferred.
+These views are DB-ready analytics foundations. API slugs, generic `limit`/`offset`/`sort`/`start`/`end` controls, and the reporting whitelist are implemented in `services/api` (see [admin-api.md](./admin-api.md)). Dashboard-specific drill-downs remain a front-end follow-up.
 
 ---
 
@@ -154,6 +154,6 @@ Participant-level hygiene queue to reduce ops friction and data quality drift.
 ## Validation artifact
 
 Use:
-- `docs/(working)/phase3-analytics-views-validation.sql`
+- `docs/archive/working/phase3-analytics-views-validation.sql`
 
 for smoke checks, equation sanity checks, bounds validation, and risk-shape checks.

@@ -1,6 +1,6 @@
 # V1 vs V2 — Application map, expectations, and open questions
 
-This document defines how the monorepo is structured, what “done” means at a high level for each deployable piece, how they fit together, and what remains to decide before implementation (especially **receipts** and **notifications**).
+This document defines V1 vs V2 product intent for each deployable piece, how they fit together, and what remains to decide (especially **receipts** and **notifications**). Front-ends live in sibling repos; this repository is the API and schema owner only.
 
 **Locked product decisions (from stakeholder input):**
 
@@ -22,7 +22,7 @@ This document defines how the monorepo is structured, what “done” means at a
 
 | # | Workspace | Package name | Role |
 |---|-----------|--------------|------|
-| 1 | `services/api` | `waiver-api` | Express: waiver submit, PDF routes, **admin API** (billing RPCs, reporting, service role). |
+| 1 | `services/api` | `waiver-api` (npm package name; leftover from the waiver-only era) | Express: waiver submit, PDF routes, **admin API** (billing RPCs, reporting, service role). |
 
 **Sibling repos:**
 
