@@ -27,7 +27,7 @@
     {
       "id": "API-SEC-001",
       "lane": "security",
-      "status": "ready",
+      "status": "done",
       "depends_on": ["API-DEV-001"],
       "production_writes": false,
       "brief": "work-queue/tasks/API-SEC-001.md"
