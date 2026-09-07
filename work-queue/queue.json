@@ -1,7 +1,7 @@
 {
   "schema_version": 2,
   "repository": "palthol/TU-api",
-  "updated": "2026-09-05",
+  "updated": "2026-09-07",
   "base_branch": "develop",
   "production_write_default": false,
   "task_dir": "work-queue/tasks",
@@ -35,7 +35,7 @@
     {
       "id": "API-TEST-001",
       "lane": "tests",
-      "status": "ready",
+      "status": "done",
       "depends_on": ["API-DEV-001"],
       "production_writes": false,
       "brief": "work-queue/tasks/API-TEST-001.md"
