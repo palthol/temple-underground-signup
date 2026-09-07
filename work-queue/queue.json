@@ -43,7 +43,7 @@
     {
       "id": "API-TEST-002",
       "lane": "tests",
-      "status": "ready",
+      "status": "done",
       "depends_on": ["API-DEV-001"],
       "production_writes": false,
       "brief": "work-queue/tasks/API-TEST-002.md"
@@ -60,7 +60,7 @@
     {
       "id": "API-GATE-001",
       "lane": "validation",
-      "status": "blocked",
+      "status": "ready",
       "depends_on": ["API-DEV-001", "API-TEST-001", "API-TEST-002", "API-OPS-001"],
       "production_writes": false,
       "brief": "work-queue/tasks/API-GATE-001.md"
