@@ -60,7 +60,7 @@
     {
       "id": "API-GATE-001",
       "lane": "validation",
-      "status": "ready",
+      "status": "done",
       "depends_on": ["API-DEV-001", "API-TEST-001", "API-TEST-002", "API-OPS-001"],
       "production_writes": false,
       "brief": "work-queue/tasks/API-GATE-001.md"
@@ -68,7 +68,7 @@
     {
       "id": "API-VAL-001",
       "lane": "validation",
-      "status": "blocked",
+      "status": "ready",
       "depends_on": ["API-GATE-001"],
       "production_writes": false,
       "brief": "work-queue/tasks/API-VAL-001.md"
@@ -76,7 +76,7 @@
     {
       "id": "API-VAL-002",
       "lane": "validation",
-      "status": "blocked",
+      "status": "ready",
       "depends_on": ["API-GATE-001"],
       "production_writes": false,
       "brief": "work-queue/tasks/API-VAL-002.md"
@@ -92,7 +92,7 @@
     {
       "id": "API-HARD-002",
       "lane": "backend",
-      "status": "blocked",
+      "status": "ready",
       "depends_on": ["API-GATE-001"],
       "production_writes": false,
       "brief": "work-queue/tasks/API-HARD-002.md"
