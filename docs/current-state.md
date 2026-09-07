@@ -22,6 +22,7 @@ response contracts and `api-schema-audit.md` for detailed schema evidence.
 | Scheduling | implemented, unproven | Session and attendance routes exist | 0 sessions and attendance rows |
 | Notifications | manually callable | Discord routes exist | No scheduler found in repository |
 | On-demand waiver PDF | implemented, unwired | Renderer/route tests pass | Active admin UI uses stored signed PDF URLs |
+| Non-prod validation env | documented | [validation-environment.md](./validation-environment.md) | Local Supabase + local API only; production `jhxzecxkccqlgyazhsnb` is out of bounds |
 
 ## Production snapshot
 
@@ -56,3 +57,4 @@ in [deployment.md](./deployment.md) and `services/api/.env.example`.
 - `npm run guard:waiver-schema`: passing.
 - Documentation reconciled against the mounted route list, migrations `0001`–`0021`, and test files (2026-09-03).
 - Deploy inventory (API-OPS-001): public host + health documented in [deployment.md](./deployment.md) (2026-09-05).
+- Validation environment (API-GATE-001): seed/cleanup procedure in [validation-environment.md](./validation-environment.md). Production project `jhxzecxkccqlgyazhsnb` and `https://api.templeunderground.com` are out of bounds for VAL writes.
