@@ -35,7 +35,7 @@ Do not rewrite other tasks' rows. Parallel agents: `API-DEV-001` and
 | --- | --- | --- | --- | --- |
 | [API-DOC-001](tasks/API-DOC-001.md) | docs | done | — | Establish and reconcile API documentation infrastructure |
 | [API-DEV-001](tasks/API-DEV-001.md) | tooling | done | API-DOC-001 | Repair lockfile so clean `npm ci` succeeds |
-| [API-SEC-001](tasks/API-SEC-001.md) | security | ready | API-DEV-001 | Triage dependency findings and safe upgrades |
+| [API-SEC-001](tasks/API-SEC-001.md) | security | done | API-DEV-001 | Triage dependency findings and safe upgrades |
 | [API-TEST-001](tasks/API-TEST-001.md) | tests | ready | API-DEV-001 | Add billing/receipt route integration tests |
 | [API-TEST-002](tasks/API-TEST-002.md) | tests | ready | API-DEV-001 | Add subscription/scheduling route integration tests |
 | [API-OPS-001](tasks/API-OPS-001.md) | deployment | done | API-DOC-001 | Inventory API deployment, hostname, CORS, env names, and ownership |
