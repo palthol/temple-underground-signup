@@ -68,7 +68,7 @@
     {
       "id": "API-VAL-001",
       "lane": "validation",
-      "status": "ready",
+      "status": "done",
       "depends_on": ["API-GATE-001"],
       "production_writes": false,
       "brief": "work-queue/tasks/API-VAL-001.md"
