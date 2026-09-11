@@ -15,13 +15,14 @@ Also read the repository control documents before starting work:
 
 ## Taking a task
 
-1. Read `work-queue/README.md`. Pick one `ready` task from `work-queue/queue.json`.
-2. Follow `work-queue/tasks/<ID>.md` only.
-3. Create `work-queue/claims/<ID>.md` from the template. If it already exists, stop.
-4. Branch from `develop` as `agent/<ID>-short-slug`.
-5. Production DB writes are forbidden unless the task file says otherwise.
-6. Stay in `allowed_paths` plus the shared queue files in the README.
-7. Verify with the commands in the brief; mark the task `done` in `queue.json` and the README table.
+1. Cursor Cloud: follow **Cursor Cloud specific instructions** below before reading the queue.
+2. Read `work-queue/README.md`. Pick one `ready` task from `work-queue/queue.json`.
+3. Follow `work-queue/tasks/<ID>.md` only.
+4. Create `work-queue/claims/<ID>.md` from the template. If it already exists, stop.
+5. Branch from `develop` as `agent/<ID>-short-slug`.
+6. Production DB writes are forbidden unless the task file says otherwise.
+7. Stay in `allowed_paths` plus the shared queue files in the README.
+8. Verify with the commands in the brief; mark the task `done` in `queue.json` and the README table.
 
 npm-workspaces monorepo. Node >= 22, npm >= 10.
 
@@ -105,6 +106,33 @@ cd TU-web && npm run dev
 - Don't invent endpoints or rename fields the front-ends already consume; the contract is
   documented in `docs/admin-api.md` and mirrored in the `admin` repo's
   `docs/frontend-design/`.
+
+## Cursor Cloud specific instructions
+
+Cloud agents boot from a pre-built environment snapshot. On-disk files
+(`work-queue/queue.json`, `work-queue/README.md`, claims) can lag
+`origin/develop` even when `git log` already shows the latest commit. Do not
+trust the working-tree queue until you refresh.
+
+Before reading the queue or claiming a task:
+
+```bash
+git fetch origin develop
+git checkout develop
+git pull origin develop
+git rev-parse HEAD origin/develop
+```
+
+`HEAD` and `origin/develop` must match. Then confirm the on-disk queue matches
+that commit:
+
+```bash
+diff -u work-queue/queue.json <(git show HEAD:work-queue/queue.json)
+```
+
+If claims say `done` but `queue.json` still says `ready` (or the reverse), the
+checkout is stale — fetch and re-read before picking work. Local checkouts that
+are already fast-forwarded to `origin/develop` can skip this.
 
 ## Deployment
 
