@@ -12,6 +12,8 @@ Make `POST /api/waivers/submit` retry-safe across storage + DB (participant,
 account bind, waiver, audit). Do not break the live waiver contract. Tests
 required.
 
+Copy-paste Cloud Agent prompt: [../prompts/API-HARD-002.md](../prompts/API-HARD-002.md).
+
 ## Allowed paths
 
 - `services/api/src/index.js` (submit handler only as needed)

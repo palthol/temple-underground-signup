@@ -57,3 +57,5 @@ Do not rewrite other tasks' rows. Parallel agents: `API-DEV-001` and
 | [API-PAY-001](tasks/API-PAY-001.md) | integrations | blocked | API-HARD-001, API-AUTH-001 | Design payment-provider integration |
 
 Safe initial parallel batch: **API-DEV-001** and **API-OPS-001**.
+
+Ready-task Cloud Agent prompts (paste one per run): [prompts/](prompts/README.md).

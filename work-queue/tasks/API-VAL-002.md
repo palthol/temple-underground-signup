@@ -12,6 +12,8 @@ Using the API-GATE-001 environment, smoke-test session CRUD, attendance, cron
 auth on Discord routes (if webhook configured in non-prod), and subscription
 enrollment. Record results. No production writes.
 
+Copy-paste Cloud Agent prompt: [../prompts/API-VAL-002.md](../prompts/API-VAL-002.md).
+
 ## Allowed paths
 
 - `docs/current-state.md`
