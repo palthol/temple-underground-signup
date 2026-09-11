@@ -204,7 +204,7 @@ every integrity query from the 2026-06-01 audit. See the workspace
 - [x] **Apply migrations `0017`–`0020`** to the live project (confirmed 2026-06-01).
 - [x] Verify `personal_finance_entries`, `charge_discounts`, `sessions.cancelled_at`, and
       `create_subscription` exist on production.
-- [ ] Smoke-test finance endpoints (personal-finance, charge-discounts, record-payment).
+- [x] Smoke-test finance endpoints (personal-finance, charge-discounts, record-payment). (API-VAL-001, local Supabase + local API)
 - [ ] Smoke-test Tier 1 endpoints (scheduling CRUD, subscription enrollment, cron auth).
 - [ ] (Optional hardening) Wrap `record-payment` and waiver submit in atomic RPCs or add
       idempotency keys.

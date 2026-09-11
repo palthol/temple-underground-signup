@@ -17,7 +17,7 @@ response contracts and `api-schema-audit.md` for detailed schema evidence.
 | Schema | verified | Project healthy; expected 21 migrations present | Latest live version is timestamped while repo file is `0021` |
 | Public/admin routes | implemented | Routes mounted; API suite passes 18/18 | Most business routes lack integration tests |
 | Reporting | implemented | All 19 referenced views exist | Most operational source tables are empty |
-| Billing/receipts | implemented, unproven | Schema and routes exist | 0 charges, payments, receipts in production |
+| Billing/receipts | verified (non-prod) | Local smoke (API-VAL-001): personal finance entries, charge discounts, record-payment, receipt void, refund | Production still has 0 charges, payments, receipts; `record-payment` remains non-atomic |
 | Subscriptions | implemented, unproven | `create_subscription` RPC and route exist | 0 subscriptions in production |
 | Scheduling | implemented, unproven | Session and attendance routes exist | 0 sessions and attendance rows |
 | Notifications | manually callable | Discord routes exist | No scheduler found in repository |
